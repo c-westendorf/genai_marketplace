@@ -1,0 +1,193 @@
+---
+description: Data schema validation requirements
+globs: "**/*.py"
+alwaysApply: false
+version: "1.0.0"
+author: "data-eng-team"
+category: "data-eng"
+tags: ["schema", "validation", "contracts"]
+---
+
+# Schema Validation Standards
+
+Requirements for validating data schemas to catch issues early.
+
+## Requirements
+
+- Define explicit schemas for all data interfaces
+- Validate incoming data against schema before processing
+- Fail fast on schema violations with clear errors
+- Version schemas and track changes
+- Test schema compatibility in CI/CD
+
+## Patterns
+
+### Good Pattern
+
+```python
+from pydantic import BaseModel, validator, Field
+from typing import List, Optional
+from datetime import datetime
+from enum import Enum
+
+class OrderStatus(str, Enum):
+    PENDING = "pending"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+class OrderItem(BaseModel):
+    """Schema for order line items."""
+    product_id: str = Field(..., min_length=1)
+    quantity: int = Field(..., gt=0)
+    unit_price: float = Field(..., ge=0)
+
+    @validator("product_id")
+    def validate_product_id(cls, v):
+        if not v.startswith("PROD-"):
+            raise ValueError("product_id must start with PROD-")
+        return v
+
+class Order(BaseModel):
+    """Schema for order records."""
+    order_id: str = Field(..., min_length=1)
+    customer_id: str = Field(..., min_length=1)
+    order_date: datetime
+    status: OrderStatus
+    items: List[OrderItem] = Field(..., min_items=1)
+    total_amount: float = Field(..., ge=0)
+    shipping_address: Optional[str] = None
+
+    @validator("total_amount")
+    def validate_total(cls, v, values):
+        if "items" in values:
+            expected = sum(item.quantity * item.unit_price for item in values["items"])
+            if abs(v - expected) > 0.01:
+                raise ValueError(f"total_amount {v} doesn't match items sum {expected}")
+        return v
+
+    class Config:
+        # Schema version for tracking changes
+        schema_extra = {
+            "version": "1.2.0",
+            "changelog": [
+                "1.2.0: Added shipping_address field",
+                "1.1.0: Added status enum validation",
+                "1.0.0: Initial schema"
+            ]
+        }
+
+
+def validate_batch(records: List[dict], schema: type) -> tuple:
+    """Validate batch of records against schema."""
+    valid = []
+    errors = []
+
+    for i, record in enumerate(records):
+        try:
+            validated = schema(**record)
+            valid.append(validated)
+        except Exception as e:
+            errors.append({
+                "index": i,
+                "record": record,
+                "error": str(e)
+            })
+
+    return valid, errors
+
+
+def process_orders(raw_orders: List[dict]) -> List[Order]:
+    """Process orders with schema validation."""
+    valid_orders, errors = validate_batch(raw_orders, Order)
+
+    if errors:
+        error_rate = len(errors) / len(raw_orders) * 100
+        logger.warning(f"Schema validation: {len(errors)} errors ({error_rate:.1f}%)")
+
+        # Fail if too many errors
+        if error_rate > 5:
+            raise ValueError(f"Error rate {error_rate}% exceeds threshold")
+
+        # Log sample errors for debugging
+        for err in errors[:5]:
+            logger.error(f"Validation error: {err}")
+
+    return valid_orders
+```
+
+### Bad Pattern
+
+```python
+# No schema, no validation, silent failures
+def process_orders(raw_orders):
+    results = []
+    for order in raw_orders:
+        try:
+            results.append({
+                "id": order.get("order_id"),
+                "total": float(order.get("total", 0))  # Silent default
+            })
+        except:
+            pass  # Silent failure!
+    return results
+```
+
+## Schema Definition Tools
+
+| Tool | Best For | Features |
+|------|----------|----------|
+| Pydantic | Python data classes | Type hints, validators |
+| JSON Schema | Language-agnostic | Standard format, tools |
+| Great Expectations | Data testing | Expectations, profiling |
+| Pandera | Pandas DataFrames | DataFrame validation |
+
+## Pandera Example
+
+```python
+import pandera as pa
+from pandera import Column, Check
+
+order_schema = pa.DataFrameSchema({
+    "order_id": Column(str, Check.str_startswith("ORD-")),
+    "customer_id": Column(str, nullable=False),
+    "order_date": Column(pa.DateTime),
+    "total_amount": Column(float, Check.ge(0)),
+    "status": Column(str, Check.isin(["pending", "completed", "cancelled"])),
+})
+
+@pa.check_input(order_schema)
+def process_orders_df(df):
+    """Process orders - schema validated on input."""
+    return df.groupby("customer_id")["total_amount"].sum()
+```
+
+## Schema Versioning
+
+```yaml
+# schema_registry.yaml
+orders:
+  current_version: "1.2.0"
+  versions:
+    "1.2.0":
+      added: ["shipping_address"]
+      breaking: false
+    "1.1.0":
+      added: ["status_enum"]
+      breaking: false
+    "1.0.0":
+      initial: true
+```
+
+## Checklist
+
+- [ ] Explicit schema defined
+- [ ] Input validation before processing
+- [ ] Clear error messages
+- [ ] Schema versioned
+- [ ] Breaking changes documented
+- [ ] CI tests for compatibility
+
+## Exceptions
+
+- Ad-hoc exploratory analysis (but add schema before production)
+- Truly schemaless data (but validate what you can)

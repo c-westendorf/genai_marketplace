@@ -1,0 +1,90 @@
+---
+description: Model training standards and best practices
+globs: "**/*.py"
+alwaysApply: false
+version: "1.0.0"
+author: "ml-team"
+category: "ml"
+tags: ["training", "modeling", "ml"]
+---
+
+# Model Training Standards
+
+Standards for training machine learning models to ensure reproducibility and quality.
+
+## Requirements
+
+- Set random seeds for all sources of randomness
+- Log all hyperparameters before training begins
+- Save model checkpoints at regular intervals
+- Track training metrics (loss, accuracy) per epoch
+- Validate on held-out data during training
+
+## Patterns
+
+### Good Pattern
+
+```python
+import random
+import numpy as np
+import torch
+
+def set_seed(seed: int = 42) -> None:
+    """Set seeds for reproducibility."""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+def train_model(
+    model,
+    train_loader,
+    val_loader,
+    config: dict,
+    checkpoint_dir: str
+) -> dict:
+    """Train model with proper logging and checkpointing."""
+    # Log hyperparameters
+    logger.info(f"Training config: {config}")
+
+    set_seed(config.get("seed", 42))
+
+    history = {"train_loss": [], "val_loss": [], "val_metric": []}
+
+    for epoch in range(config["epochs"]):
+        # Training
+        train_loss = train_epoch(model, train_loader)
+
+        # Validation
+        val_loss, val_metric = validate(model, val_loader)
+
+        # Log metrics
+        history["train_loss"].append(train_loss)
+        history["val_loss"].append(val_loss)
+        history["val_metric"].append(val_metric)
+
+        logger.info(f"Epoch {epoch}: train_loss={train_loss:.4f}, "
+                   f"val_loss={val_loss:.4f}, val_metric={val_metric:.4f}")
+
+        # Checkpoint
+        if epoch % config.get("checkpoint_freq", 5) == 0:
+            save_checkpoint(model, epoch, checkpoint_dir)
+
+    return history
+```
+
+### Bad Pattern
+
+```python
+# No seed setting, no logging, no checkpoints
+def train_model(model, data):
+    for epoch in range(100):
+        loss = model.fit(data)
+    return model
+```
+
+## Exceptions
+
+- Quick prototyping in notebooks (but add proper training before production)
+- Pre-trained models used without fine-tuning

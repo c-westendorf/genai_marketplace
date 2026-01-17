@@ -1,0 +1,60 @@
+name: Validate Marketplace
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate YAML frontmatter
+        run: npm run lint:yaml
+
+      - name: Lint Markdown
+        run: npm run lint:markdown
+
+      - name: Spell check
+        run: npm run spellcheck
+
+      - name: Check rule lengths
+        run: |
+          for file in rules/**/*.mdc; do
+            lines=$(wc -l < "$file")
+            if [ "$lines" -gt 300 ]; then
+              echo "ERROR: $file exceeds 300 lines ($lines lines)"
+              exit 1
+            fi
+          done
+          echo "All rules within length limits"
+
+      - name: Check skill lengths
+        run: |
+          for file in skills/*.md; do
+            lines=$(wc -l < "$file")
+            if [ "$lines" -gt 500 ]; then
+              echo "ERROR: $file exceeds 500 lines ($lines lines)"
+              exit 1
+            fi
+          done
+          echo "All skills within length limits"
+
+      - name: Validate frontmatter schema
+        run: npm run validate:schema
+
+      - name: Check for duplicates
+        run: npm run check:duplicates

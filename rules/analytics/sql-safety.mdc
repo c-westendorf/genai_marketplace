@@ -1,0 +1,130 @@
+---
+description: SQL query safety and best practices
+globs: "**/*.sql"
+alwaysApply: false
+version: "1.0.0"
+author: "analytics-team"
+category: "analytics"
+tags: ["sql", "safety", "performance"]
+---
+
+# SQL Safety Guidelines
+
+Standards for writing safe, efficient, and maintainable SQL queries.
+
+## Requirements
+
+- Always use explicit column names, never SELECT *
+- Include WHERE clauses on large tables
+- Use LIMIT during development and testing
+- Add comments explaining complex logic
+- Use parameterized queries to prevent injection
+
+## Patterns
+
+### Good Pattern
+
+```sql
+-- Get active users with recent orders
+-- Business context: Used for weekly engagement report
+SELECT
+    u.user_id,
+    u.email,
+    u.created_at AS registration_date,
+    COUNT(o.order_id) AS order_count,
+    SUM(o.total_amount) AS total_spent
+FROM users u
+LEFT JOIN orders o
+    ON u.user_id = o.user_id
+    AND o.created_at >= DATEADD(day, -30, CURRENT_DATE)
+WHERE
+    u.status = 'active'
+    AND u.created_at >= '2023-01-01'  -- Filter early for performance
+GROUP BY
+    u.user_id,
+    u.email,
+    u.created_at
+HAVING COUNT(o.order_id) > 0
+ORDER BY total_spent DESC
+LIMIT 1000;
+```
+
+### Bad Pattern
+
+```sql
+-- No comments, SELECT *, no LIMIT, cartesian join risk
+SELECT * FROM users, orders
+WHERE users.status = 'active'
+```
+
+## Safety Checklist
+
+| Check | Why |
+|-------|-----|
+| No SELECT * | Schema changes break queries |
+| WHERE on big tables | Prevents full table scans |
+| LIMIT in dev | Protects against runaway queries |
+| Explicit JOINs | Prevents accidental cartesian products |
+| Comments | Future maintainability |
+
+## Query Templates
+
+### Aggregation with Filtering
+
+```sql
+-- Purpose: [describe what this calculates]
+SELECT
+    dimension_column,
+    COUNT(*) AS record_count,
+    SUM(metric_column) AS total_metric,
+    AVG(metric_column) AS avg_metric
+FROM table_name
+WHERE
+    date_column >= @start_date
+    AND date_column < @end_date
+    AND filter_column = @filter_value
+GROUP BY dimension_column
+HAVING COUNT(*) >= @min_count
+ORDER BY total_metric DESC
+LIMIT @max_rows;
+```
+
+### Safe DELETE/UPDATE
+
+```sql
+-- Always preview before modifying
+-- Step 1: Preview what will be affected
+SELECT COUNT(*), MIN(created_at), MAX(created_at)
+FROM table_name
+WHERE condition = 'value';
+
+-- Step 2: Execute in transaction
+BEGIN TRANSACTION;
+
+DELETE FROM table_name
+WHERE condition = 'value'
+LIMIT 1000;  -- Batch deletes
+
+-- Step 3: Verify and commit
+SELECT COUNT(*) FROM table_name WHERE condition = 'value';
+COMMIT;  -- or ROLLBACK if wrong
+```
+
+## Injection Prevention
+
+```python
+# Good: Parameterized query
+cursor.execute(
+    "SELECT * FROM users WHERE user_id = %s",
+    (user_id,)
+)
+
+# Bad: String concatenation (SQL injection risk!)
+cursor.execute(f"SELECT * FROM users WHERE user_id = {user_id}")
+```
+
+## Exceptions
+
+- SELECT * acceptable in quick ad-hoc exploration
+- LIMIT not needed for known-small tables
+- Complex CTEs may need less commenting if self-documenting

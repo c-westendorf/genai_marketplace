@@ -1,0 +1,212 @@
+---
+description: Logging standards for data pipelines
+globs: "**/*.py"
+alwaysApply: false
+version: "1.0.0"
+author: "data-eng-team"
+category: "data-eng"
+tags: ["logging", "observability", "monitoring"]
+---
+
+# Logging Requirements
+
+Standards for logging in data pipelines to enable debugging and monitoring.
+
+## Requirements
+
+- Use structured logging (JSON format)
+- Include correlation IDs for request tracing
+- Log at appropriate levels (DEBUG, INFO, WARNING, ERROR)
+- Capture key metrics (rows processed, duration, errors)
+- Never log sensitive data (PII, credentials)
+
+## Log Levels
+
+| Level | Use For | Example |
+|-------|---------|---------|
+| DEBUG | Detailed diagnostic info | Row-level processing details |
+| INFO | Normal operation milestones | "Pipeline started", "Step completed" |
+| WARNING | Unexpected but handled | "Retrying failed request" |
+| ERROR | Failures requiring attention | "Pipeline failed", exceptions |
+
+## Patterns
+
+### Good Pattern
+
+```python
+import logging
+import json
+import time
+import uuid
+from functools import wraps
+from typing import Any, Callable
+
+class StructuredLogger:
+    """Structured JSON logger for data pipelines."""
+
+    def __init__(self, name: str, correlation_id: str = None):
+        self.logger = logging.getLogger(name)
+        self.correlation_id = correlation_id or str(uuid.uuid4())
+        self.context = {}
+
+    def _log(self, level: int, message: str, **kwargs):
+        """Log with structured context."""
+        log_data = {
+            "message": message,
+            "correlation_id": self.correlation_id,
+            "timestamp": time.time(),
+            **self.context,
+            **kwargs
+        }
+        # Remove any sensitive fields
+        log_data = self._sanitize(log_data)
+        self.logger.log(level, json.dumps(log_data))
+
+    def _sanitize(self, data: dict) -> dict:
+        """Remove sensitive fields from log data."""
+        sensitive_keys = {"password", "token", "secret", "ssn", "credit_card"}
+        return {
+            k: "***REDACTED***" if k.lower() in sensitive_keys else v
+            for k, v in data.items()
+        }
+
+    def set_context(self, **kwargs):
+        """Set persistent context fields."""
+        self.context.update(kwargs)
+
+    def debug(self, message: str, **kwargs):
+        self._log(logging.DEBUG, message, **kwargs)
+
+    def info(self, message: str, **kwargs):
+        self._log(logging.INFO, message, **kwargs)
+
+    def warning(self, message: str, **kwargs):
+        self._log(logging.WARNING, message, **kwargs)
+
+    def error(self, message: str, **kwargs):
+        self._log(logging.ERROR, message, **kwargs)
+
+
+def log_pipeline_metrics(logger: StructuredLogger):
+    """Decorator to log function execution metrics."""
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> Any:
+            start_time = time.time()
+            func_name = func.__name__
+
+            logger.info(f"Starting {func_name}", step=func_name, status="started")
+
+            try:
+                result = func(*args, **kwargs)
+                duration = time.time() - start_time
+
+                # Extract metrics if result is dict
+                metrics = result if isinstance(result, dict) else {}
+
+                logger.info(
+                    f"Completed {func_name}",
+                    step=func_name,
+                    status="completed",
+                    duration_seconds=round(duration, 2),
+                    **metrics
+                )
+                return result
+
+            except Exception as e:
+                duration = time.time() - start_time
+                logger.error(
+                    f"Failed {func_name}: {str(e)}",
+                    step=func_name,
+                    status="failed",
+                    duration_seconds=round(duration, 2),
+                    error_type=type(e).__name__,
+                    error_message=str(e)
+                )
+                raise
+
+        return wrapper
+    return decorator
+
+
+# Usage example
+logger = StructuredLogger("order_pipeline")
+logger.set_context(pipeline="orders_etl", environment="production")
+
+@log_pipeline_metrics(logger)
+def extract_orders(start_date, end_date):
+    """Extract orders from source."""
+    orders = fetch_from_source(start_date, end_date)
+    return {"rows_extracted": len(orders)}
+
+@log_pipeline_metrics(logger)
+def transform_orders(orders):
+    """Transform order data."""
+    transformed = apply_transformations(orders)
+    return {"rows_transformed": len(transformed), "rows_filtered": len(orders) - len(transformed)}
+
+@log_pipeline_metrics(logger)
+def load_orders(orders):
+    """Load orders to destination."""
+    rows_loaded = write_to_destination(orders)
+    return {"rows_loaded": rows_loaded}
+```
+
+### Bad Pattern
+
+```python
+# Unstructured, no context, logs sensitive data
+def process_data(data, api_key):
+    print(f"Processing with key: {api_key}")  # Logs credential!
+    print("Starting...")  # No context
+    for row in data:
+        print(f"Row: {row}")  # Too verbose, not structured
+    print("Done")
+```
+
+## Log Output Example
+
+```json
+{
+  "message": "Completed extract_orders",
+  "correlation_id": "abc-123",
+  "timestamp": 1705312800.123,
+  "pipeline": "orders_etl",
+  "environment": "production",
+  "step": "extract_orders",
+  "status": "completed",
+  "duration_seconds": 45.23,
+  "rows_extracted": 15000
+}
+```
+
+## Sensitive Data
+
+Never log:
+- Passwords, API keys, tokens
+- PII (SSN, email, phone)
+- Credit card numbers
+- Health information
+
+```python
+# Sanitization patterns
+SENSITIVE_PATTERNS = [
+    r"\b\d{3}-\d{2}-\d{4}\b",  # SSN
+    r"\b\d{16}\b",             # Credit card
+    r"password['\"]?\s*[:=]\s*['\"]?[^'\"]+",  # Passwords
+]
+```
+
+## Checklist
+
+- [ ] Structured JSON logging
+- [ ] Correlation IDs included
+- [ ] Appropriate log levels
+- [ ] Metrics captured (rows, duration)
+- [ ] Sensitive data redacted
+- [ ] Errors include stack traces
+
+## Exceptions
+
+- Local development debugging (but don't commit verbose logging)
+- Performance-critical hot paths (log sampling instead)

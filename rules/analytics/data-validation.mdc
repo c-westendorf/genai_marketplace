@@ -1,0 +1,149 @@
+---
+description: Data validation requirements for analysis
+globs: "**/*.py"
+alwaysApply: false
+version: "1.0.0"
+author: "analytics-team"
+category: "analytics"
+tags: ["validation", "data-quality", "testing"]
+---
+
+# Data Validation Standards
+
+Requirements for validating data before analysis to ensure quality results.
+
+## Requirements
+
+- Validate data shape and types upon loading
+- Check for nulls, duplicates, and outliers
+- Verify expected value ranges and distributions
+- Document assumptions and validation results
+- Fail fast on critical validation errors
+
+## Patterns
+
+### Good Pattern
+
+```python
+import pandas as pd
+import numpy as np
+from dataclasses import dataclass
+from typing import List, Optional
+
+@dataclass
+class ValidationResult:
+    passed: bool
+    check_name: str
+    message: str
+    details: Optional[dict] = None
+
+def validate_dataframe(
+    df: pd.DataFrame,
+    expected_columns: List[str],
+    date_column: Optional[str] = None,
+    id_column: Optional[str] = None
+) -> List[ValidationResult]:
+    """Comprehensive data validation."""
+    results = []
+
+    # 1. Check columns exist
+    missing_cols = set(expected_columns) - set(df.columns)
+    results.append(ValidationResult(
+        passed=len(missing_cols) == 0,
+        check_name="columns_present",
+        message=f"Missing columns: {missing_cols}" if missing_cols else "All columns present",
+        details={"missing": list(missing_cols)}
+    ))
+
+    # 2. Check for empty dataframe
+    results.append(ValidationResult(
+        passed=len(df) > 0,
+        check_name="not_empty",
+        message=f"DataFrame has {len(df)} rows"
+    ))
+
+    # 3. Check for duplicates
+    if id_column and id_column in df.columns:
+        dupe_count = df[id_column].duplicated().sum()
+        results.append(ValidationResult(
+            passed=dupe_count == 0,
+            check_name="no_duplicates",
+            message=f"Found {dupe_count} duplicate {id_column}s",
+            details={"duplicate_count": int(dupe_count)}
+        ))
+
+    # 4. Check null percentages
+    null_pcts = (df.isnull().sum() / len(df) * 100).to_dict()
+    high_null_cols = {k: v for k, v in null_pcts.items() if v > 5}
+    results.append(ValidationResult(
+        passed=len(high_null_cols) == 0,
+        check_name="null_check",
+        message=f"Columns with >5% nulls: {high_null_cols}" if high_null_cols else "Null rates acceptable",
+        details={"null_percentages": null_pcts}
+    ))
+
+    # 5. Check date column validity
+    if date_column and date_column in df.columns:
+        try:
+            dates = pd.to_datetime(df[date_column])
+            future_dates = (dates > pd.Timestamp.now()).sum()
+            results.append(ValidationResult(
+                passed=future_dates == 0,
+                check_name="valid_dates",
+                message=f"Found {future_dates} future dates" if future_dates else "Dates valid",
+                details={"min_date": str(dates.min()), "max_date": str(dates.max())}
+            ))
+        except Exception as e:
+            results.append(ValidationResult(
+                passed=False,
+                check_name="valid_dates",
+                message=f"Date parsing failed: {e}"
+            ))
+
+    return results
+
+
+def validate_and_report(df, **kwargs) -> pd.DataFrame:
+    """Run validation and return cleaned data or raise."""
+    results = validate_dataframe(df, **kwargs)
+
+    # Log all results
+    for r in results:
+        status = "✓" if r.passed else "✗"
+        print(f"{status} {r.check_name}: {r.message}")
+
+    # Fail on critical errors
+    failed = [r for r in results if not r.passed]
+    critical_failures = [r for r in failed if r.check_name in ["columns_present", "not_empty"]]
+
+    if critical_failures:
+        raise ValueError(f"Critical validation failures: {[r.check_name for r in critical_failures]}")
+
+    return df
+```
+
+### Bad Pattern
+
+```python
+# No validation - assumes data is clean
+def analyze(filepath):
+    df = pd.read_csv(filepath)
+    # Directly use without any checks
+    result = df.groupby("category").sum()
+    return result
+```
+
+## Validation Checklist
+
+| Check | Why | Action on Failure |
+|-------|-----|-------------------|
+| Schema match | Upstream changes | Fail with clear error |
+| No duplicates | Incorrect aggregations | Dedupe or investigate |
+| Null rates | Missing data bias | Impute or exclude |
+| Value ranges | Data corruption | Flag outliers |
+| Date validity | ETL issues | Investigate pipeline |
+
+## Exceptions
+
+- Quick exploratory analysis (but add validation before conclusions)
+- Trusted internal data sources (but still spot-check)

@@ -1,0 +1,53 @@
+---
+description: [Brief description under 100 chars]
+globs: "**/*.py"
+alwaysApply: false
+version: "1.0.0"
+author: "[your-name-or-team]"
+category: "[ml|analytics|data-eng|general]"
+tags: ["tag1", "tag2"]
+---
+
+# [Rule Title]
+
+Brief overview of what this rule enforces and why it matters.
+
+## Requirements
+
+- Requirement 1: Clear, actionable instruction
+- Requirement 2: Clear, actionable instruction
+- Requirement 3: Clear, actionable instruction
+
+## Patterns
+
+### Good Pattern
+
+```python
+# Example of the correct approach with explanation
+def example_function(param: str) -> dict:
+    """Clear docstring explaining purpose."""
+    # Implementation following the rule
+    result = process(param)
+    return {"status": "success", "data": result}
+```
+
+### Bad Pattern
+
+```python
+# Example of what to avoid with explanation of why
+def example_function(param):
+    # This violates the rule because...
+    return process(param)
+```
+
+## Exceptions
+
+When this rule may not apply:
+
+- Exception 1: Explanation of when this is acceptable
+- Exception 2: Explanation of when this is acceptable
+
+## Related Rules
+
+- [Related Rule 1](../category/related-rule.mdc)
+- [Related Rule 2](../category/other-rule.mdc)

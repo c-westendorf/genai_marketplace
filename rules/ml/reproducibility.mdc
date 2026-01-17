@@ -1,0 +1,180 @@
+---
+description: ML experiment reproducibility requirements
+globs: "**/*.py"
+alwaysApply: false
+version: "1.0.0"
+author: "ml-team"
+category: "ml"
+tags: ["reproducibility", "experiments", "versioning"]
+---
+
+# Reproducibility Standards
+
+Requirements for reproducible machine learning experiments.
+
+## Requirements
+
+- Pin all package versions in requirements files
+- Set and log random seeds for all libraries
+- Version control datasets or log data checksums
+- Log complete experiment configuration
+- Save model artifacts with metadata
+
+## Patterns
+
+### Good Pattern
+
+```python
+import hashlib
+import json
+import random
+from datetime import datetime
+from pathlib import Path
+
+import numpy as np
+import torch
+
+def set_all_seeds(seed: int = 42) -> None:
+    """Set seeds for all random number generators."""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+
+def get_data_checksum(df) -> str:
+    """Generate checksum for data versioning."""
+    return hashlib.md5(
+        pd.util.hash_pandas_object(df).values.tobytes()
+    ).hexdigest()
+
+
+def log_experiment(
+    config: dict,
+    data_checksum: str,
+    metrics: dict,
+    model_path: str,
+    output_dir: str
+) -> str:
+    """Log complete experiment metadata."""
+
+    experiment = {
+        "timestamp": datetime.now().isoformat(),
+        "config": config,
+        "data": {
+            "checksum": data_checksum,
+            "source": config.get("data_source"),
+        },
+        "environment": {
+            "python": sys.version,
+            "packages": get_package_versions(),
+        },
+        "metrics": metrics,
+        "artifacts": {
+            "model": model_path,
+        },
+        "seed": config.get("seed", 42),
+    }
+
+    # Save experiment log
+    exp_id = f"exp_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    exp_path = Path(output_dir) / f"{exp_id}.json"
+
+    with open(exp_path, "w") as f:
+        json.dump(experiment, f, indent=2)
+
+    return exp_id
+
+
+def get_package_versions() -> dict:
+    """Get versions of key packages."""
+    import pkg_resources
+    key_packages = ["numpy", "pandas", "scikit-learn", "torch", "tensorflow"]
+    versions = {}
+    for pkg in key_packages:
+        try:
+            versions[pkg] = pkg_resources.get_distribution(pkg).version
+        except pkg_resources.DistributionNotFound:
+            pass
+    return versions
+
+
+# Complete reproducible experiment
+def run_experiment(config_path: str):
+    """Run fully reproducible experiment."""
+
+    # Load config
+    with open(config_path) as f:
+        config = json.load(f)
+
+    # Set seeds
+    set_all_seeds(config.get("seed", 42))
+
+    # Load and checksum data
+    df = pd.read_parquet(config["data_path"])
+    data_checksum = get_data_checksum(df)
+
+    # Train model
+    model, metrics = train_model(df, config)
+
+    # Save model
+    model_path = save_model(model, config["output_dir"])
+
+    # Log everything
+    exp_id = log_experiment(
+        config=config,
+        data_checksum=data_checksum,
+        metrics=metrics,
+        model_path=model_path,
+        output_dir=config["output_dir"]
+    )
+
+    return exp_id
+```
+
+### Bad Pattern
+
+```python
+# No seeds, no logging, no versioning
+def train():
+    df = pd.read_csv("data.csv")
+    model = train_model(df)
+    model.save("model.pkl")
+    # No way to reproduce this!
+```
+
+## Requirements File
+
+```txt
+# requirements.txt - pin exact versions
+numpy==1.24.3
+pandas==2.0.2
+scikit-learn==1.2.2
+torch==2.0.1
+```
+
+## Experiment Tracking Tools
+
+| Tool | Best For | Features |
+|------|----------|----------|
+| MLflow | Full experiment lifecycle | UI, model registry, deployment |
+| Weights & Biases | Team collaboration | Visualizations, hyperparameter sweeps |
+| DVC | Data versioning | Git for data, pipelines |
+| Sacred | Experiment configuration | Auto-logging, observers |
+
+## Checklist
+
+- [ ] Random seeds set and logged
+- [ ] Package versions pinned
+- [ ] Data versioned or checksummed
+- [ ] Config saved with experiment
+- [ ] Model artifacts include metadata
+- [ ] Experiment can be re-run from logs
+
+## Exceptions
+
+- Quick exploratory analysis (but document limitations)
+- When using established pipelines with built-in logging

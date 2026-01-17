@@ -1,0 +1,170 @@
+---
+description: Data pipeline development standards
+globs: "**/*.py"
+alwaysApply: false
+version: "1.0.0"
+author: "data-eng-team"
+category: "data-eng"
+tags: ["pipelines", "etl", "orchestration"]
+---
+
+# Pipeline Standards
+
+Standards for building reliable, maintainable data pipelines.
+
+## Requirements
+
+- Make pipelines idempotent (safe to re-run)
+- Implement proper error handling and retries
+- Log pipeline progress and metrics
+- Support backfills with date range parameters
+- Include data quality checks between stages
+
+## Patterns
+
+### Good Pattern
+
+```python
+from datetime import datetime, timedelta
+from typing import Optional
+import logging
+
+logger = logging.getLogger(__name__)
+
+class DataPipeline:
+    """Idempotent data pipeline with proper error handling."""
+
+    def __init__(self, config: dict):
+        self.config = config
+        self.metrics = {"rows_processed": 0, "rows_failed": 0}
+
+    def run(
+        self,
+        start_date: datetime,
+        end_date: Optional[datetime] = None,
+        dry_run: bool = False
+    ) -> dict:
+        """Run pipeline for date range (idempotent)."""
+
+        end_date = end_date or start_date + timedelta(days=1)
+
+        logger.info(f"Starting pipeline: {start_date} to {end_date}")
+        logger.info(f"Config: {self.config}")
+
+        try:
+            # Step 1: Extract
+            logger.info("Step 1/4: Extracting data")
+            raw_data = self.extract(start_date, end_date)
+            self.validate_extract(raw_data)
+
+            # Step 2: Transform
+            logger.info("Step 2/4: Transforming data")
+            transformed = self.transform(raw_data)
+            self.validate_transform(transformed)
+
+            # Step 3: Load (idempotent - delete then insert)
+            if not dry_run:
+                logger.info("Step 3/4: Loading data")
+                self.delete_existing(start_date, end_date)
+                self.load(transformed)
+            else:
+                logger.info("Step 3/4: Skipping load (dry run)")
+
+            # Step 4: Verify
+            logger.info("Step 4/4: Verifying load")
+            if not dry_run:
+                self.verify_load(start_date, end_date, len(transformed))
+
+            logger.info(f"Pipeline complete: {self.metrics}")
+            return {"status": "success", "metrics": self.metrics}
+
+        except Exception as e:
+            logger.error(f"Pipeline failed: {e}", exc_info=True)
+            return {"status": "failed", "error": str(e), "metrics": self.metrics}
+
+    def extract(self, start_date, end_date):
+        """Extract data from source."""
+        # Implementation
+        pass
+
+    def validate_extract(self, data):
+        """Validate extracted data."""
+        if len(data) == 0:
+            logger.warning("No data extracted - this may be expected")
+        self.metrics["rows_extracted"] = len(data)
+
+    def transform(self, data):
+        """Transform data."""
+        # Implementation
+        pass
+
+    def validate_transform(self, data):
+        """Validate transformed data."""
+        null_counts = data.isnull().sum()
+        if null_counts.any():
+            logger.warning(f"Nulls in transformed data: {null_counts.to_dict()}")
+        self.metrics["rows_transformed"] = len(data)
+
+    def delete_existing(self, start_date, end_date):
+        """Delete existing data for idempotency."""
+        logger.info(f"Deleting existing data: {start_date} to {end_date}")
+        # DELETE FROM table WHERE date BETWEEN start AND end
+
+    def load(self, data):
+        """Load data to destination."""
+        # Implementation
+        self.metrics["rows_loaded"] = len(data)
+
+    def verify_load(self, start_date, end_date, expected_count):
+        """Verify data was loaded correctly."""
+        # SELECT COUNT(*) WHERE date BETWEEN start AND end
+        actual_count = self.get_loaded_count(start_date, end_date)
+        if actual_count != expected_count:
+            raise ValueError(f"Load verification failed: expected {expected_count}, got {actual_count}")
+```
+
+### Bad Pattern
+
+```python
+# Not idempotent, no error handling, no logging
+def run_pipeline():
+    data = extract_data()
+    transformed = transform(data)
+    load(transformed)  # Appends duplicates on re-run!
+```
+
+## Idempotency Strategies
+
+| Strategy | Implementation | Use When |
+|----------|----------------|----------|
+| Delete-Insert | Delete range then insert | Date-partitioned data |
+| Upsert/Merge | UPDATE if exists, INSERT if not | Dimension tables |
+| Truncate-Load | Clear table, reload all | Small tables |
+
+## Error Handling
+
+```python
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=4, max=60)
+)
+def extract_with_retry(source, query):
+    """Extract with exponential backoff retry."""
+    return source.execute(query)
+```
+
+## Checklist
+
+- [ ] Pipeline is idempotent
+- [ ] Errors handled with retries
+- [ ] Progress logged at each stage
+- [ ] Supports date range backfills
+- [ ] Quality checks between stages
+- [ ] Metrics captured
+
+## Exceptions
+
+- One-time migration scripts (but document as such)
+- Exploratory data pulls (but add standards before production)

@@ -1,0 +1,132 @@
+---
+description: Prevent data leakage in ML pipelines
+globs: "**/*.py"
+alwaysApply: false
+version: "1.0.0"
+author: "ml-team"
+category: "ml"
+tags: ["leakage", "validation", "data-integrity"]
+---
+
+# Data Leakage Prevention
+
+Critical requirements to prevent data leakage that invalidates models.
+
+## Requirements
+
+- Split data BEFORE any preprocessing or feature engineering
+- Fit transformers only on training data, transform all sets
+- Never use future information for past predictions
+- Validate that target variable has no proxy in features
+- Review feature importance for suspiciously perfect predictors
+
+## Leakage Types
+
+| Type | Description | Example |
+|------|-------------|---------|
+| Target Leakage | Target info leaks into features | Using outcome date as feature |
+| Train-Test Contamination | Test data influences training | Fitting scaler on full dataset |
+| Temporal Leakage | Future data used for past | Using tomorrow's price today |
+
+## Patterns
+
+### Good Pattern
+
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+
+def create_ml_pipeline(X, y, test_size=0.2, random_state=42):
+    """Proper pipeline preventing leakage."""
+
+    # 1. Split FIRST, before any preprocessing
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=random_state
+    )
+
+    # 2. Create pipeline that fits only on training
+    pipeline = Pipeline([
+        ("scaler", StandardScaler()),  # Fit only on train
+        ("model", LogisticRegression())
+    ])
+
+    # 3. Fit on training only
+    pipeline.fit(X_train, y_train)
+
+    # 4. Evaluate on held-out test
+    test_score = pipeline.score(X_test, y_test)
+
+    return pipeline, test_score
+
+
+# For time series: respect temporal order
+def time_series_split(df, date_col, target_col, train_end_date):
+    """Time-aware split preventing temporal leakage."""
+
+    # Training: all data before cutoff
+    train = df[df[date_col] < train_end_date]
+
+    # Test: data after cutoff
+    test = df[df[date_col] >= train_end_date]
+
+    return train, test
+
+
+# Feature engineering with leakage prevention
+def engineer_features_safe(df, is_training=True, fitted_encoder=None):
+    """Feature engineering that prevents leakage."""
+
+    if is_training:
+        # Fit encoder only on training
+        encoder = TargetEncoder()
+        encoded = encoder.fit_transform(df["category"], df["target"])
+        return encoded, encoder
+    else:
+        # Use pre-fitted encoder for test/inference
+        if fitted_encoder is None:
+            raise ValueError("Must provide fitted encoder for non-training data")
+        encoded = fitted_encoder.transform(df["category"])
+        return encoded, fitted_encoder
+```
+
+### Bad Pattern
+
+```python
+# LEAKAGE: Fitting scaler on full data before split
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)  # BAD: includes test data
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y)
+
+# LEAKAGE: Target encoding fit on full data
+encoder = TargetEncoder()
+df["cat_encoded"] = encoder.fit_transform(df["category"], df["target"])
+# Now split - but encoding used test target values!
+
+# LEAKAGE: Using future information
+df["next_day_return"] = df["price"].shift(-1) / df["price"]  # Future info!
+df["predict_direction"] = df["next_day_return"] > 0  # Target
+# Training on this would leak future prices
+```
+
+## Leakage Checklist
+
+- [ ] Data split before any transformation
+- [ ] Transformers fit only on training set
+- [ ] No features derived from target
+- [ ] Time series: no future information used
+- [ ] Cross-validation respects temporal order
+- [ ] Feature importance reviewed for red flags
+
+## Red Flags
+
+Watch for these signs of potential leakage:
+- Perfect or near-perfect accuracy
+- Single feature dominates importance
+- Feature highly correlated with target name
+- Model degrades significantly in production
+
+## Exceptions
+
+- Exploratory analysis where split isn't needed yet
+- When explicitly analyzing full dataset distributions

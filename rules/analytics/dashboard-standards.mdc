@@ -1,0 +1,170 @@
+---
+description: Dashboard design and implementation standards
+globs: "**/*.py"
+alwaysApply: false
+version: "1.0.0"
+author: "analytics-team"
+category: "analytics"
+tags: ["dashboards", "visualization", "reporting"]
+---
+
+# Dashboard Standards
+
+Guidelines for creating effective, maintainable dashboards.
+
+## Requirements
+
+- Include data freshness indicator (last updated timestamp)
+- Add clear titles and axis labels to all charts
+- Provide context with comparisons (YoY, vs target, vs benchmark)
+- Document metric definitions accessible from dashboard
+- Use consistent color schemes and formatting
+
+## Design Principles
+
+| Principle | Implementation |
+|-----------|----------------|
+| Clarity | One key insight per visualization |
+| Context | Always show comparisons |
+| Accuracy | Proper scales, no truncated axes |
+| Actionability | Clear what action to take |
+
+## Patterns
+
+### Good Pattern
+
+```python
+import plotly.express as px
+import plotly.graph_objects as go
+from datetime import datetime
+
+def create_metric_card(
+    title: str,
+    current_value: float,
+    previous_value: float,
+    target: float,
+    format_str: str = "{:,.0f}"
+) -> go.Figure:
+    """Metric card with context and comparison."""
+
+    # Calculate changes
+    pct_change = (current_value - previous_value) / previous_value * 100
+    vs_target = (current_value - target) / target * 100
+
+    # Determine color
+    color = "green" if current_value >= target else "red"
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Indicator(
+        mode="number+delta",
+        value=current_value,
+        number={"prefix": "$" if "revenue" in title.lower() else ""},
+        delta={
+            "reference": previous_value,
+            "relative": True,
+            "valueformat": ".1%"
+        },
+        title={
+            "text": f"{title}<br><span style='font-size:0.7em;color:gray'>Target: {format_str.format(target)}</span>"
+        },
+    ))
+
+    fig.update_layout(
+        height=200,
+        margin=dict(l=20, r=20, t=60, b=20)
+    )
+
+    return fig
+
+
+def create_time_series_chart(
+    df,
+    date_col: str,
+    value_col: str,
+    title: str,
+    comparison_df=None,
+    comparison_label: str = "Previous Year"
+) -> go.Figure:
+    """Time series with comparison period."""
+
+    fig = go.Figure()
+
+    # Current period
+    fig.add_trace(go.Scatter(
+        x=df[date_col],
+        y=df[value_col],
+        mode="lines+markers",
+        name="Current",
+        line=dict(color="#1f77b4", width=2)
+    ))
+
+    # Comparison period
+    if comparison_df is not None:
+        fig.add_trace(go.Scatter(
+            x=comparison_df[date_col],
+            y=comparison_df[value_col],
+            mode="lines",
+            name=comparison_label,
+            line=dict(color="#7f7f7f", width=1, dash="dash")
+        ))
+
+    fig.update_layout(
+        title=dict(
+            text=f"{title}<br><sub>Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}</sub>",
+            x=0.5
+        ),
+        xaxis_title=date_col.replace("_", " ").title(),
+        yaxis_title=value_col.replace("_", " ").title(),
+        legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
+        hovermode="x unified"
+    )
+
+    return fig
+
+
+def add_metric_definition(fig, definition: str) -> go.Figure:
+    """Add metric definition annotation."""
+    fig.add_annotation(
+        text=f"ℹ️ {definition}",
+        xref="paper", yref="paper",
+        x=0, y=-0.15,
+        showarrow=False,
+        font=dict(size=10, color="gray"),
+        align="left"
+    )
+    return fig
+```
+
+### Bad Pattern
+
+```python
+# No title, no labels, no context
+def make_chart(df):
+    plt.plot(df["date"], df["value"])
+    plt.show()
+```
+
+## Dashboard Checklist
+
+- [ ] Data freshness timestamp visible
+- [ ] All charts have titles and labels
+- [ ] Comparisons included (prior period, target)
+- [ ] Metric definitions documented
+- [ ] Consistent color scheme
+- [ ] Mobile-responsive if needed
+- [ ] Loading states for slow queries
+
+## Color Guidelines
+
+| Use Case | Color |
+|----------|-------|
+| Positive change | Green (#2ca02c) |
+| Negative change | Red (#d62728) |
+| Neutral/current | Blue (#1f77b4) |
+| Comparison/prior | Gray (#7f7f7f) |
+
+## Exceptions
+
+- Quick internal exploration (but polish before sharing)
+- Automated alerting dashboards (simpler is fine)

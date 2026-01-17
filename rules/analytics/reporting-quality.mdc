@@ -1,0 +1,186 @@
+---
+description: Report quality and documentation standards
+globs: "**/*.py"
+alwaysApply: false
+version: "1.0.0"
+author: "analytics-team"
+category: "analytics"
+tags: ["reporting", "documentation", "quality"]
+---
+
+# Reporting Quality Standards
+
+Standards for creating accurate, trustworthy analytical reports.
+
+## Requirements
+
+- Document data sources and extraction dates
+- Include methodology section explaining calculations
+- State assumptions and limitations explicitly
+- Provide confidence levels for estimates
+- Include reproducibility information
+
+## Report Structure
+
+| Section | Purpose | Required |
+|---------|---------|----------|
+| Executive Summary | Key findings in 3-5 bullets | Yes |
+| Methodology | How analysis was done | Yes |
+| Data Sources | Where data came from | Yes |
+| Findings | Detailed results | Yes |
+| Limitations | Caveats and assumptions | Yes |
+| Appendix | Technical details | Optional |
+
+## Patterns
+
+### Good Pattern
+
+```python
+from dataclasses import dataclass
+from datetime import datetime
+from typing import List, Optional
+
+@dataclass
+class ReportMetadata:
+    """Standard metadata for all reports."""
+    title: str
+    author: str
+    created_date: datetime
+    data_sources: List[str]
+    data_extraction_date: datetime
+    methodology: str
+    assumptions: List[str]
+    limitations: List[str]
+    confidence_level: Optional[str] = None
+
+
+def generate_report_header(metadata: ReportMetadata) -> str:
+    """Generate standardized report header."""
+    return f"""
+# {metadata.title}
+
+**Author:** {metadata.author}
+**Date:** {metadata.created_date.strftime('%Y-%m-%d')}
+
+---
+
+## Data Sources
+
+{chr(10).join(f'- {source}' for source in metadata.data_sources)}
+
+**Data as of:** {metadata.data_extraction_date.strftime('%Y-%m-%d')}
+
+---
+
+## Methodology
+
+{metadata.methodology}
+
+---
+
+## Assumptions
+
+{chr(10).join(f'- {assumption}' for assumption in metadata.assumptions)}
+
+---
+
+## Limitations
+
+{chr(10).join(f'- {limitation}' for limitation in metadata.limitations)}
+
+{f'**Confidence Level:** {metadata.confidence_level}' if metadata.confidence_level else ''}
+
+---
+"""
+
+
+# Example usage
+report_meta = ReportMetadata(
+    title="Q4 Customer Churn Analysis",
+    author="Analytics Team",
+    created_date=datetime.now(),
+    data_sources=[
+        "customer_events (Snowflake)",
+        "subscription_history (Postgres)",
+        "support_tickets (Zendesk API)"
+    ],
+    data_extraction_date=datetime(2024, 1, 15),
+    methodology="""
+    Churn was defined as no activity in 90+ days.
+    Logistic regression used to identify risk factors.
+    Model trained on 2023 data, validated on Q4 2023.
+    """,
+    assumptions=[
+        "Users with no login are assumed churned",
+        "Enterprise accounts excluded (different behavior)",
+        "Free trial users included after conversion"
+    ],
+    limitations=[
+        "Cannot capture offline product usage",
+        "Support ticket sentiment not analyzed",
+        "Sample size for enterprise segment too small"
+    ],
+    confidence_level="Medium - based on 6 months of data"
+)
+```
+
+### Bad Pattern
+
+```python
+# No metadata, no methodology, no limitations
+def create_report(df):
+    return f"""
+    # Sales Report
+
+    Total sales: ${df['sales'].sum():,.0f}
+
+    Top products:
+    {df.groupby('product')['sales'].sum().head()}
+    """
+```
+
+## Quality Checklist
+
+### Before Publishing
+
+- [ ] Data sources documented
+- [ ] Extraction dates specified
+- [ ] Methodology explained
+- [ ] Assumptions listed
+- [ ] Limitations acknowledged
+- [ ] Numbers verified against source
+- [ ] Peer reviewed
+
+### Numeric Accuracy
+
+```python
+def verify_totals(df, report_totals: dict) -> dict:
+    """Verify reported numbers match source data."""
+    verification = {}
+
+    for metric, reported_value in report_totals.items():
+        if metric in df.columns:
+            actual = df[metric].sum()
+            match = abs(actual - reported_value) < 0.01
+            verification[metric] = {
+                "reported": reported_value,
+                "actual": actual,
+                "match": match
+            }
+
+    return verification
+```
+
+## Confidence Levels
+
+| Level | Definition | Use When |
+|-------|------------|----------|
+| High | Well-established methodology, large sample | N > 1000, validated approach |
+| Medium | Standard methods, adequate sample | N > 100, reasonable assumptions |
+| Low | Limited data, experimental approach | N < 100, new methodology |
+| Directional | Indicates trend only | Qualitative insights |
+
+## Exceptions
+
+- Internal quick analyses (but note "DRAFT - not for distribution")
+- Automated reports with established templates

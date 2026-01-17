@@ -1,0 +1,123 @@
+---
+description: Hyperparameter tuning best practices
+globs: "**/*.py"
+alwaysApply: false
+version: "1.0.0"
+author: "ml-team"
+category: "ml"
+tags: ["hyperparameters", "tuning", "optimization"]
+---
+
+# Hyperparameter Tuning
+
+Standards for systematic hyperparameter optimization.
+
+## Requirements
+
+- Use cross-validation, never tune on test set
+- Document search space and strategy used
+- Log all trials with parameters and results
+- Set computational budget before starting
+- Report best parameters with validation performance
+
+## Patterns
+
+### Good Pattern
+
+```python
+import optuna
+from sklearn.model_selection import cross_val_score
+import logging
+
+def tune_model(
+    X_train,
+    y_train,
+    model_class,
+    param_space: dict,
+    n_trials: int = 100,
+    cv_folds: int = 5,
+    metric: str = "f1_weighted"
+) -> dict:
+    """Systematic hyperparameter tuning with Optuna."""
+
+    # Log search configuration
+    logging.info(f"Starting hyperparameter search")
+    logging.info(f"Param space: {param_space}")
+    logging.info(f"Budget: {n_trials} trials, {cv_folds}-fold CV")
+
+    def objective(trial):
+        # Sample parameters
+        params = {
+            "n_estimators": trial.suggest_int("n_estimators", 50, 500),
+            "max_depth": trial.suggest_int("max_depth", 3, 15),
+            "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
+            "min_samples_split": trial.suggest_int("min_samples_split", 2, 20),
+        }
+
+        model = model_class(**params)
+
+        # Cross-validation score
+        scores = cross_val_score(
+            model, X_train, y_train,
+            cv=cv_folds, scoring=metric
+        )
+
+        return scores.mean()
+
+    # Run optimization
+    study = optuna.create_study(direction="maximize")
+    study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
+
+    # Log results
+    logging.info(f"Best trial: {study.best_trial.number}")
+    logging.info(f"Best params: {study.best_params}")
+    logging.info(f"Best CV score: {study.best_value:.4f}")
+
+    return {
+        "best_params": study.best_params,
+        "best_score": study.best_value,
+        "n_trials": len(study.trials),
+        "study": study  # For further analysis
+    }
+
+
+def get_tuning_summary(study) -> dict:
+    """Generate summary of tuning results."""
+    return {
+        "best_params": study.best_params,
+        "best_value": study.best_value,
+        "n_trials": len(study.trials),
+        "param_importances": optuna.importance.get_param_importances(study),
+    }
+```
+
+### Bad Pattern
+
+```python
+# Tuning on test set, no logging, manual search
+def tune_model(X_train, y_train, X_test, y_test):
+    best_score = 0
+    for lr in [0.01, 0.1, 1.0]:
+        for depth in [3, 5, 10]:
+            model = XGBClassifier(learning_rate=lr, max_depth=depth)
+            model.fit(X_train, y_train)
+            # BAD: evaluating on test set during tuning
+            score = model.score(X_test, y_test)
+            if score > best_score:
+                best_score = score
+                best_params = {"lr": lr, "depth": depth}
+    return best_params
+```
+
+## Search Strategies
+
+| Strategy | When to Use | Pros | Cons |
+|----------|-------------|------|------|
+| Grid Search | Small space, few params | Exhaustive | Expensive |
+| Random Search | Large space, limited budget | Efficient | May miss optimum |
+| Bayesian (Optuna) | Any size, smart exploration | Most efficient | More complex |
+
+## Exceptions
+
+- Quick baseline models (use sensible defaults)
+- When domain knowledge dictates specific values
