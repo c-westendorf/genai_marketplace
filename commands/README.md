@@ -2,7 +2,7 @@
 
 Slash-command shortcuts for common data workflows. **Optional execution layer** for teams using LLM-driven automation.
 
-> **Note:** This directory is part of the optional execution layer. For the lightweight knowledge-first core, see [rules/](../rules/), [skills/](../skills/), and [prompts/](../prompts/). Commands are available on the [`execution-optional` branch](https://github.com/your-org/cursor-marketplace/tree/execution-optional).
+> **Phase 2 Notice:** In Phase 2, commands will move to the [`execution-optional` branch](https://github.com/your-org/cursor-marketplace/tree/execution-optional) for cleaner separation. For now, they're on main branch as reference.
 
 ## Available Commands
 
