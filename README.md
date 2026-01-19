@@ -2,8 +2,6 @@
 
 A curated collection of AI coding rules, skills, and prompts for data science and analytics teams. **Tool-agnostic** — works with Cursor, Claude, VSCode, Zed, and other GenAI IDEs.
 
-> **Note:** This marketplace adapts patterns from [everything-claude-code](https://github.com/affaan-m/everything-claude-code) and is built for ecosystem independence. While optimized for data domain, the structure is replicable for other domains.
-
 ---
 
 ## Philosophy
