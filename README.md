@@ -76,44 +76,17 @@ ln -s ../shared/rules/ml/model-training.mdc .cursor/rules/
 
 ---
 
-## Roadmap
+## Core Concepts
 
-### Phase 1: Knowledge-First Core (Main Branch) — ✅ Complete
-- ✅ Reorganize skills by domain (ML, Analytics, Data Eng)
-- ✅ Extend prompt library
-- ✅ Add tool compatibility matrix
-- ✅ Update templates with metadata
-- ✅ Create agents/ with data specialists
-- ✅ Create commands/ with workflow shortcuts
+### What Makes This Marketplace Different
 
-### Phase 2: Separate Execution-Optional Branch & Data Platform Integrations — ✅ Complete
+**Domain-Organized:** Resources are grouped by domain (ML, Analytics, Data Engineering) so you find what you need quickly.
 
-For teams wanting **cleaner separation** and **data platform integrations**:
+**Tool-Agnostic:** Works with Cursor, Claude, VSCode, Zed—not locked to one IDE or LLM.
 
-```bash
-# Stay on main (lightweight, knowledge-only)
-git checkout main
+**Modular:** Start with knowledge-only rules/skills/prompts. Add automation (agents/commands) when ready.
 
-# Or switch to execution-optional (includes agents, commands, integrations)
-git checkout execution-optional
-# See EXECUTION_SETUP.md for complete integration guide
-```
-
-#### What's in Phase 2 — All Complete ✅
-- ✅ Agents/ and commands/ moved to execution-optional branch
-- ✅ **Data Platform Integrations (MCP Configs):**
-  - Snowflake (Azure Snowflake querying, transformation, profiling)
-  - BigQuery (GCP analytics, ML capabilities)
-  - Atlassian (Jira + Confluence for repo management & documentation)
-- ✅ **VSCode Setup Guide** (Copilot, OpenAI, Gemini, Claude)
-- ✅ **Platform-Specific Documentation** (auth, setup, usage, troubleshooting)
-
-**Current Status:** Main branch lightweight + knowledge-first; execution-optional branch fully equipped with integrations, agents, commands. Ready for team feedback. See [PHASE_2_COMPLETION.md](PHASE_2_COMPLETION.md) for details.
-
-### Phase 3: Domain Extensibility (Future)
-- [ ] Template showing how to adapt marketplace for other domains (backend, frontend, devops)
-- [ ] Context window management per domain
-- [ ] Community contribution process
+**Flexible Consumption:** Use as a git submodule for automatic updates, or fork/copy for full control.
 
 ---
 
@@ -149,16 +122,20 @@ Note: Agents, commands, and integrations are on execution-optional branch
 ### Two Paths to Use This Marketplace
 
 **Path 1: Knowledge-First (Main Branch)**
-- Get rules, skills, prompts as static reference
-- No setup needed; works immediately
-- Distribution: `git submodule add https://github.com/your-org/cursor-marketplace .cursor/shared`
-- Best for: Simple consumption, git-friendly, lightweight
+- **What you get:** Rules, skills, prompts as static reference material
+- **Setup:** Just clone or add as git submodule; no configuration needed
+- **Use case:** Learning, reference, teams using manual workflows
+- **Start:** `git clone https://github.com/your-org/cursor-marketplace` or add as submodule
 
-**Path 2: Execution-Driven (execution-optional Branch)**
-- Get agents for LLM-driven code review
-- Get commands for guided workflows
-- Requires setup per IDE/tool (see EXECUTION_SETUP.md)
-- Best for: Teams with automation infrastructure
+**Path 2: Automation-Enabled (execution-optional Branch)**
+- **What you get:** Everything from Path 1 + agents, commands, and data platform integrations
+- **Agents:** Specialist LLM personas for code review (data-reviewer, model-trainer, pipeline-validator)
+- **Commands:** Workflow shortcuts (/eda, /validate-data, /evaluate-model)
+- **Integrations:** Snowflake, BigQuery, Atlassian (Jira + Confluence) MCP configs with full setup guides
+- **Setup:** Follow [EXECUTION_SETUP.md](EXECUTION_SETUP.md) for your IDE (VSCode, Cursor, Claude Code)
+- **Use case:** Teams with LLM-native workflows wanting automation and data platform access
+
+**Choose your path:** Start with main for knowledge; switch to execution-optional when ready for automation.
 
 ---
 
@@ -198,13 +175,26 @@ See [prompts/README.md](prompts/README.md) for full index organized by:
 - Use Cases (EDA, Debugging, Code Review, Validation, Feature Engineering)
 - Domains (ML, Analytics, Data Eng)
 
-### Optional: Agents & Commands
+### Optional: Agents, Commands & Integrations
 
-See [agents/README.md](agents/README.md) and [commands/README.md](commands/README.md) for optional execution layers:
-- **Agents:** Specialist reviewers (data-reviewer, model-trainer, pipeline-validator)
-- **Commands:** Workflow shortcuts (/eda, /validate-data, /evaluate-model)
+Available on the **execution-optional** branch:
 
-These are available in the main branch; future `execution-optional` branch will separate them for cleaner consumption.
+**Agents:** Specialist LLM personas for focused review
+- [data-reviewer](agents/data-reviewer.md) - Data quality and transformation review
+- [model-trainer](agents/model-trainer.md) - ML training and evaluation guidance
+- [pipeline-validator](agents/pipeline-validator.md) - Pipeline architecture and reliability
+
+**Commands:** Workflow shortcuts
+- [/eda](commands/eda.md) - Exploratory data analysis
+- [/validate-data](commands/validate-data.md) - Data transformation validation
+- [/evaluate-model](commands/evaluate-model.md) - Model training review
+
+**Integrations:** Data platform and tool connections (MCP Protocol)
+- [Snowflake](integrations/SNOWFLAKE_SETUP.md) - Query, profile, and analyze data
+- [BigQuery](integrations/BIGQUERY_SETUP.md) - Analytics and ML model creation
+- [Atlassian](integrations/ATLASSIAN_SETUP.md) - Jira issue tracking and Confluence documentation
+
+See [EXECUTION_SETUP.md](EXECUTION_SETUP.md) for complete setup guide for your IDE.
 
 ---
 
