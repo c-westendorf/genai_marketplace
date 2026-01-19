@@ -31,6 +31,170 @@ Optional Execution (execution-optional Branch)
 
 ## Setup by IDE/Tool
 
+### VSCode + Copilot Setup
+
+VSCode is the recommended IDE for this marketplace with native Copilot integration.
+
+#### 1. Install Extensions
+
+```bash
+# Copilot (GitHub's native LLM integration)
+code --install-extension GitHub.copilot
+
+# Optional: Other LLM providers
+code --install-extension OpenAI.openai-copilot
+code --install-extension Google.gemini
+```
+
+#### 2. Add Marketplace as Git Submodule
+
+```bash
+# In your project root
+git submodule add https://github.com/your-org/cursor-marketplace .marketplace
+cd .marketplace
+git checkout execution-optional
+```
+
+#### 3. Configure MCP Servers
+
+Edit `.vscode/settings.json` in your project root:
+
+```json
+{
+  "mcp.servers": {
+    "marketplace-agents": {
+      "command": "cat",
+      "args": [".marketplace/agents/data-reviewer.md"],
+      "description": "Data quality reviewer agent"
+    },
+    "marketplace-commands": {
+      "command": "cat",
+      "args": [".marketplace/commands/eda.md"],
+      "description": "EDA command reference"
+    },
+    "snowflake": {
+      "command": "node",
+      "args": ["path/to/snowflake-mcp-server.js"],
+      "env": {
+        "SNOWFLAKE_ACCOUNT": "${env:SNOWFLAKE_ACCOUNT}",
+        "SNOWFLAKE_USER": "${env:SNOWFLAKE_USER}",
+        "SNOWFLAKE_PASSWORD": "${env:SNOWFLAKE_PASSWORD}",
+        "SNOWFLAKE_WAREHOUSE": "${env:SNOWFLAKE_WAREHOUSE}",
+        "SNOWFLAKE_DATABASE": "${env:SNOWFLAKE_DATABASE}",
+        "SNOWFLAKE_SCHEMA": "${env:SNOWFLAKE_SCHEMA}"
+      }
+    },
+    "bigquery": {
+      "command": "node",
+      "args": ["path/to/bigquery-mcp-server.js"],
+      "env": {
+        "GOOGLE_PROJECT_ID": "${env:GOOGLE_PROJECT_ID}",
+        "GOOGLE_APPLICATION_CREDENTIALS": "${env:GOOGLE_APPLICATION_CREDENTIALS}",
+        "BIGQUERY_DATASET": "${env:BIGQUERY_DATASET}",
+        "BIGQUERY_LOCATION": "${env:BIGQUERY_LOCATION}"
+      }
+    },
+    "atlassian": {
+      "command": "node",
+      "args": ["path/to/atlassian-mcp-server.js"],
+      "env": {
+        "ATLASSIAN_DOMAIN": "${env:ATLASSIAN_DOMAIN}",
+        "ATLASSIAN_EMAIL": "${env:ATLASSIAN_EMAIL}",
+        "ATLASSIAN_API_TOKEN": "${env:ATLASSIAN_API_TOKEN}",
+        "ATLASSIAN_JIRA_PROJECT_KEYS": "${env:ATLASSIAN_JIRA_PROJECT_KEYS}",
+        "ATLASSIAN_CONFLUENCE_SPACE_KEYS": "${env:ATLASSIAN_CONFLUENCE_SPACE_KEYS}"
+      }
+    }
+  }
+}
+```
+
+#### 4. Configure LLM Providers
+
+Add API keys to `.env` (gitignore this file):
+
+```bash
+# GitHub Copilot (authenticates via VSCode account)
+# No setup needed; sign in via VSCode extensions panel
+
+# Alternative: OpenAI API
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4
+
+# Alternative: Google Gemini
+GEMINI_API_KEY=...
+GEMINI_MODEL=gemini-pro
+
+# Alternative: Anthropic Claude
+ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_MODEL=claude-3-sonnet-20240229
+```
+
+#### 5. Use Agents in Copilot Chat
+
+Open Copilot chat (Cmd+Shift+I on macOS, Ctrl+Shift+I on Windows/Linux) and reference agents:
+
+```
+@marketplace-agents data-reviewer
+
+Review this SQL transformation for data quality issues:
+[paste SQL code]
+```
+
+Or use Copilot to query data platforms:
+
+```
+@snowflake
+Show me the top 10 customers by revenue from the ANALYTICS database
+
+@bigquery
+Create a linear regression model for churn prediction
+
+@atlassian
+Create a DATA project issue for data quality improvements
+```
+
+#### 6. Example Workflow: Query → Analyze → Document
+
+**In VSCode Copilot Chat:**
+
+```
+Step 1: @snowflake
+Query the CUSTOMERS table and identify high-value segments
+
+Step 2: @marketplace-agents data-reviewer
+Validate the data quality and business logic
+
+Step 3: @atlassian
+Create a Confluence page documenting the findings and
+link it to a DATA project issue for stakeholder review
+```
+
+**Result:** Complete workflow from query to documentation within VSCode.
+
+#### 7. Keyboard Shortcuts & Tips
+
+| Action | Shortcut |
+|--------|----------|
+| Open Copilot Chat | Cmd+Shift+I (macOS), Ctrl+Shift+I (Windows/Linux) |
+| Inline Copilot | Cmd+I (macOS), Ctrl+I (Windows/Linux) |
+| Reference marketplace | Type `@marketplace-agents` |
+| Reference data platform | Type `@snowflake`, `@bigquery`, `@atlassian` |
+| Paste code context | Paste directly in chat; Copilot infers context |
+
+#### 8. Troubleshooting VSCode Setup
+
+| Issue | Solution |
+|-------|----------|
+| "Copilot not authenticated" | Sign in via Extensions panel (GitHub Copilot) |
+| "MCP server not found" | Verify path in `.vscode/settings.json` is correct |
+| "Missing .env variables" | Create `.env` file with required credentials; add to `.gitignore` |
+| "Command not recognized" | Reference agents/commands explicitly with `@marketplace-agents` |
+
+See [integrations/README.md](.marketplace/integrations/README.md) for detailed setup guides for Snowflake, BigQuery, and Atlassian.
+
+---
+
 ### Cursor Setup
 
 1. **Add marketplace as git submodule:**
