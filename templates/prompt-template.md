@@ -1,9 +1,12 @@
 # Prompt: [Name]
 
-**Version:** 1.0.0
-**Author:** [your-name-or-team]
-**Category:** [eda|debugging|code-review|general]
-
+---
+version: "1.0.0"
+author: "[your-name-or-team]"
+category: "[eda|debugging|code-review|validation|feature-engineering|error-diagnosis|general]"
+domain: "[ml|analytics|data-eng]"
+compatible_with: ["Claude", "Cursor", "VSCode", "Zed", "generic-llm"]
+tags: ["tag1", "tag2"]
 ---
 
 ## Purpose

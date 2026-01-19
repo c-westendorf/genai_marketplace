@@ -5,6 +5,8 @@ alwaysApply: false
 version: "1.0.0"
 author: "[your-name-or-team]"
 category: "[ml|analytics|data-eng|general]"
+domain: "[ml|analytics|data-eng]"
+compatible_with: ["Claude", "Cursor", "VSCode", "Zed", "generic-llm"]
 tags: ["tag1", "tag2"]
 ---
 

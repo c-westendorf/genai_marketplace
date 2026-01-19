@@ -1,9 +1,13 @@
 # [Skill Name]
 
-**Version:** 1.0.0
-**Author:** [your-name-or-team]
-**Category:** [ml|analytics|data-eng|general]
-
+---
+version: "1.0.0"
+author: "[your-name-or-team]"
+category: "[ml|analytics|data-eng|general]"
+domain: "[ml|analytics|data-eng]"
+compatible_with: ["Claude", "Cursor", "VSCode", "Zed", "generic-llm"]
+execution_context: "manual"
+tags: ["tag1", "tag2"]
 ---
 
 ## Purpose
