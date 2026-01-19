@@ -28,8 +28,9 @@ This repository contains shared resources that can be consumed across projects v
 | [Skills](skills/) | 5+ | Workflow guides with steps and checkpoints |
 | [Prompts](prompts/) | 6+ | Reusable prompt templates by use case |
 | [Templates](templates/) | 3 | Starter templates for contributions |
-| **Agents** | *coming* | Optional: delegated task specialists ([see execution-optional branch](https://github.com/your-org/cursor-marketplace/tree/execution-optional)) |
-| **Commands** | *coming* | Optional: slash-command shortcuts for workflows ([see execution-optional branch](https://github.com/your-org/cursor-marketplace/tree/execution-optional)) |
+| **Agents** | 3 | Optional: delegated task specialists ([on execution-optional branch](https://github.com/your-org/cursor-marketplace/tree/execution-optional)) |
+| **Commands** | 3 | Optional: slash-command shortcuts for workflows ([on execution-optional branch](https://github.com/your-org/cursor-marketplace/tree/execution-optional)) |
+| **Integrations** | 3 | Optional: data platform & tool configs ([on execution-optional branch](https://github.com/your-org/cursor-marketplace/tree/execution-optional)) |
 
 ---
 
@@ -79,25 +80,42 @@ ln -s ../shared/rules/ml/model-training.mdc .cursor/rules/
 
 ## Roadmap
 
-### Phase 1: Knowledge-First Core (Main Branch) — ✅ Current
+### Phase 1: Knowledge-First Core (Main Branch) — ✅ Complete
 - ✅ Reorganize skills by domain (ML, Analytics, Data Eng)
-- ✅ Extend prompt library (6 → 12+ templates)
+- ✅ Extend prompt library
 - ✅ Add tool compatibility matrix
 - ✅ Update templates with metadata
-- ✅ Create agents/ with data specialists (data-reviewer, model-trainer, pipeline-validator)
-- ✅ Create commands/ with workflow shortcuts (/eda, /validate-data, /evaluate-model)
+- ✅ Create agents/ with data specialists
+- ✅ Create commands/ with workflow shortcuts
 
-### Phase 2: Optional Execution Layer (Planning)
-Create a separate `execution-optional` branch for teams wanting LLM-driven automation:
-- [ ] Move agents/ and commands/ to optional branch
-- [ ] Create `hooks/` for automation triggers
-- [ ] Create `integrations/` for MCP configs (Snowflake, BigQuery, dbt, W&B)
-- [ ] Document setup for automation workflows
+### Phase 2: Separate Execution-Optional Branch — 🔄 In Progress
 
-### Phase 3: Domain Extensibility (Deferred)
-- [ ] Add other-domains template (backend, frontend, devops, etc.)
-- [ ] Document context window management per domain
-- [ ] Build community contribution process
+For teams wanting **cleaner separation** and **data platform integrations**:
+
+```bash
+# Stay on main (lightweight, knowledge-only)
+git checkout main
+
+# Or switch to execution-optional (includes agents, commands, integrations)
+git checkout execution-optional
+# See EXECUTION_SETUP.md for integration guide
+```
+
+#### What's in Phase 2
+- ✅ Agents/ and commands/ moved to execution-optional branch
+- 🔄 **Data Platform Integrations (MCP Configs):**
+  - Snowflake (Azure Snowflake querying, transformation, profiling)
+  - BigQuery (GCP analytics, ML capabilities)
+  - Atlassian (Jira + Confluence for repo management & documentation)
+- 🔄 **VSCode Setup Guide** (Copilot, OpenAI, Gemini, Claude)
+- 🔄 **Platform-Specific Documentation** (auth, setup, usage)
+
+**Current Status:** Main branch lightweight; execution-optional branch getting integrations
+
+### Phase 3: Domain Extensibility (Future)
+- [ ] Template showing how to adapt marketplace for other domains (backend, frontend, devops)
+- [ ] Context window management per domain
+- [ ] Community contribution process
 
 ---
 
@@ -122,28 +140,27 @@ cursor-marketplace/
 │   ├── analytics/
 │   └── data-eng/
 │
-├── agents/                 # Optional: Specialist reviewers
-│   ├── data-reviewer
-│   ├── model-trainer
-│   └── pipeline-validator
-│
-└── commands/               # Optional: Workflow shortcuts
-    ├── /eda
-    ├── /validate-data
-    └── /evaluate-model
+└── templates/              # Contribution templates
+    ├── rule-template.mdc
+    ├── skill-template.md
+    └── prompt-template.md
+
+Note: Agents, commands, and integrations are on execution-optional branch
 ```
 
-### Two Layers
+### Two Paths to Use This Marketplace
 
-**Knowledge-First (Always Available):**
-- Rules, Skills, Prompts = static reference material
-- Git submodule-friendly; lightweight
-- Manual workflows; no automation dependencies
+**Path 1: Knowledge-First (Main Branch)**
+- Get rules, skills, prompts as static reference
+- No setup needed; works immediately
+- Distribution: `git submodule add https://github.com/your-org/cursor-marketplace .cursor/shared`
+- Best for: Simple consumption, git-friendly, lightweight
 
-**Optional Automation (Future Branch):**
-- Agents, Commands = LLM-driven review and delegation
-- Requires setup in your IDE/tool
-- Faster workflows for teams with automation infrastructure
+**Path 2: Execution-Driven (execution-optional Branch)**
+- Get agents for LLM-driven code review
+- Get commands for guided workflows
+- Requires setup per IDE/tool (see EXECUTION_SETUP.md)
+- Best for: Teams with automation infrastructure
 
 ---
 
