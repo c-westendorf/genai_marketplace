@@ -28,8 +28,9 @@ This repository contains shared resources that can be consumed across projects v
 | [Skills](skills/) | 5+ | Workflow guides with steps and checkpoints |
 | [Prompts](prompts/) | 6+ | Reusable prompt templates by use case |
 | [Templates](templates/) | 3 | Starter templates for contributions |
-| **Agents** | *coming* | Optional: delegated task specialists ([see execution-optional branch](https://github.com/your-org/cursor-marketplace/tree/execution-optional)) |
-| **Commands** | *coming* | Optional: slash-command shortcuts for workflows ([see execution-optional branch](https://github.com/your-org/cursor-marketplace/tree/execution-optional)) |
+| **Agents** | 3 | Optional: delegated task specialists ([on execution-optional branch](https://github.com/your-org/cursor-marketplace/tree/execution-optional)) |
+| **Commands** | 3 | Optional: slash-command shortcuts for workflows ([on execution-optional branch](https://github.com/your-org/cursor-marketplace/tree/execution-optional)) |
+| **Integrations** | 3 | Optional: data platform & tool configs ([on execution-optional branch](https://github.com/your-org/cursor-marketplace/tree/execution-optional)) |
 
 ---
 
@@ -84,34 +85,36 @@ ln -s ../shared/rules/ml/model-training.mdc .cursor/rules/
 - ✅ Extend prompt library
 - ✅ Add tool compatibility matrix
 - ✅ Update templates with metadata
-- ✅ Create agents/ with data specialists (data-reviewer, model-trainer, pipeline-validator)
-- ✅ Create commands/ with workflow shortcuts (/eda, /validate-data, /evaluate-model)
-- ✅ Agents/Commands included in main branch for reference
+- ✅ Create agents/ with data specialists
+- ✅ Create commands/ with workflow shortcuts
 
-### Phase 2: Separate Execution-Optional Branch (Planned)
+### Phase 2: Separate Execution-Optional Branch — 🔄 In Progress
 
-For teams wanting **cleaner separation** of knowledge from automation:
+For teams wanting **cleaner separation** and **data platform integrations**:
 
 ```bash
 # Stay on main (lightweight, knowledge-only)
 git checkout main
 
-# Or switch to execution-optional (includes agents/commands setup)
+# Or switch to execution-optional (includes agents, commands, integrations)
 git checkout execution-optional
 # See EXECUTION_SETUP.md for integration guide
 ```
 
-#### What's Happening in Phase 2
-- Agents/ and commands/ will move to separate `execution-optional` branch
-- Main branch will contain only: rules/, skills/, prompts/, templates/
-- execution-optional branch will document agent setup for each IDE/tool
-- Hooks and integrations (MCPs) will be on execution-optional
+#### What's in Phase 2
+- ✅ Agents/ and commands/ moved to execution-optional branch
+- 🔄 **Data Platform Integrations (MCP Configs):**
+  - Snowflake (Azure Snowflake querying, transformation, profiling)
+  - BigQuery (GCP analytics, ML capabilities)
+  - Atlassian (Jira + Confluence for repo management & documentation)
+- 🔄 **VSCode Setup Guide** (Copilot, OpenAI, Gemini, Claude)
+- 🔄 **Platform-Specific Documentation** (auth, setup, usage)
 
-**Current Status:** Both available on main; execution-optional branch created and ready
+**Current Status:** Main branch lightweight; execution-optional branch getting integrations
 
 ### Phase 3: Domain Extensibility (Future)
 - [ ] Template showing how to adapt marketplace for other domains (backend, frontend, devops)
-- [ ] Documentation on context window management per domain
+- [ ] Context window management per domain
 - [ ] Community contribution process
 
 ---
@@ -137,15 +140,12 @@ cursor-marketplace/
 │   ├── analytics/
 │   └── data-eng/
 │
-├── agents/                 # Optional: Specialist reviewers (move to execution-optional in Phase 2)
-│   ├── data-reviewer
-│   ├── model-trainer
-│   └── pipeline-validator
-│
-└── commands/               # Optional: Workflow shortcuts (move to execution-optional in Phase 2)
-    ├── /eda
-    ├── /validate-data
-    └── /evaluate-model
+└── templates/              # Contribution templates
+    ├── rule-template.mdc
+    ├── skill-template.md
+    └── prompt-template.md
+
+Note: Agents, commands, and integrations are on execution-optional branch
 ```
 
 ### Two Paths to Use This Marketplace
