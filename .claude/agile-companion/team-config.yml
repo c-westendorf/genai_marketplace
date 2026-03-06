@@ -1,0 +1,108 @@
+# agile-companion team configuration
+# Lives in team repo at: .agile-companion/team-config.yml
+# Commit changes here — every skill instance reads this on startup.
+# New team member: clone repo, skill reads this automatically.
+
+# ── Team identity ─────────────────────────────────────────────────────
+team:
+  name: "Data Science Team"
+  repo: "git@github.com:org/team-repo.git"
+  changelog_dir: "changelogs"
+  members: []  # list of usernames — used for "who hasn't filed" detection
+  # members: [jordan, alex, priya, mira, sam]
+
+# ── Confluence ────────────────────────────────────────────────────────
+confluence:
+  space_key: "DS"
+
+  # Team database — structured 3P entries, one row per person per week
+  # This is the source of truth. The team page reads from this.
+  database_id: ""              # Confluence database ID — set on first setup
+  database_name: "Team 3P Log"
+
+  # Team page — renders a database view, never hand-edited
+  team_page_id: ""             # page ID of the team weekly digest
+  team_page_title: "Data Science — Weekly Digest"
+
+  # Personal pages — human-readable archive per person
+  personal_pages: true
+  personal_page_parent_id: "" # parent page ID for personal pages
+
+  sync:
+    # Both triggers supported. Both require explicit approval before writing.
+    auto_offer_on_comms_approval: true   # offer sync after 3P editorial approval
+    manual_anytime: true                  # person can trigger sync any time via COMMS
+    require_approval_before_sync: true    # never sync without explicit confirm
+
+# ── Jira ──────────────────────────────────────────────────────────────
+jira:
+  default_project_key: "DS"
+  mcp_endpoint: ""             # team's Atlassian MCP endpoint
+  fallback_mode: "clipboard"   # clipboard mode when MCP unavailable
+
+# ── IDE signals ───────────────────────────────────────────────────────
+# Defines which signals count as work evidence for THIS team.
+# Collection script captures all; this config filters what gets surfaced.
+
+ide_signals:
+  commits:
+    enabled: true
+    weight: high
+
+  file_saves:
+    enabled: true
+    weight: low
+    min_session_minutes: 10
+
+  test_runs:
+    enabled: true
+    weight: medium
+    capture_pass_fail: true
+
+  builds:
+    enabled: false
+    weight: low
+
+  notebook_runs:
+    enabled: true        # set false for non-DS teams
+    weight: high
+    capture_cell_count: true
+
+  model_training:
+    enabled: true        # set false for non-DS teams
+    weight: high
+    capture_duration: true
+
+  time_in_file:
+    enabled: true
+    weight: low
+    deep_work_threshold_minutes: 25
+
+  # Add team-specific signals here:
+  # custom_signals:
+  #   dbt_runs:
+  #     label: "dbt model run"
+  #     weight: medium
+
+# ── Plausible wins ────────────────────────────────────────────────────
+wins:
+  adaptive: true
+  heavy_meeting_day_count: 1
+  normal_day_count: 2
+  # Companion asks: "Heavy meeting day?" at standup if adaptive: true
+
+# ── 3P filing ─────────────────────────────────────────────────────────
+comms:
+  available: always              # COMMS mode available any time, any day
+  week_close_checks_if_filed: true  # WEEK_CLOSE offers to generate if not yet filed
+  short_week_days_question: true    # always ask days worked for week_days field
+
+# ── Friction settings ─────────────────────────────────────────────────
+friction:
+  quick_standup_available: true
+  silent_eod_generation: true
+  trust_calibration_sessions: 10   # full drafts for first N sessions
+  pre_read_pullback: true          # morning wins pulled back at EOD
+  wins_file: "~/.agile-companion/today-wins.json"
+  activity_log: "~/.agile-companion/today-activity.log"
+  commit_log: "~/.agile-companion/today-commits.log"
