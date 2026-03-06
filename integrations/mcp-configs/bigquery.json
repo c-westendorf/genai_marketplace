@@ -1,0 +1,106 @@
+{
+  "name": "bigquery-mcp",
+  "description": "Google BigQuery MCP server for data analytics, ML, and exploration in VSCode",
+  "version": "1.0.0",
+  "compatible_with": ["VSCode", "Copilot", "OpenAI", "Gemini", "Claude"],
+  "platform": "gcp-bigquery",
+  "commands": {
+    "query": {
+      "description": "Execute SQL queries against BigQuery datasets",
+      "parameters": {
+        "sql": "SQL query string (standard SQL syntax)",
+        "project_id": "GCP project ID",
+        "dataset_id": "BigQuery dataset ID (optional, uses default if not specified)",
+        "use_legacy_sql": "Boolean, use legacy SQL syntax (default: false)",
+        "max_results": "Maximum rows to return (default: 10000)",
+        "timeout_ms": "Query timeout in milliseconds (default: 600000)"
+      }
+    },
+    "list_datasets": {
+      "description": "List all datasets in the project",
+      "parameters": {
+        "project_id": "GCP project ID",
+        "filter": "Filter datasets by name pattern (optional)"
+      }
+    },
+    "list_tables": {
+      "description": "List tables in a dataset",
+      "parameters": {
+        "project_id": "GCP project ID",
+        "dataset_id": "BigQuery dataset ID",
+        "include_metadata": "Include row count and size info (default: true)"
+      }
+    },
+    "get_table_schema": {
+      "description": "Get schema information for a table",
+      "parameters": {
+        "project_id": "GCP project ID",
+        "dataset_id": "BigQuery dataset ID",
+        "table_id": "Table name"
+      }
+    },
+    "data_profile": {
+      "description": "Generate profile statistics for a table or query results",
+      "parameters": {
+        "project_id": "GCP project ID",
+        "dataset_id": "BigQuery dataset ID",
+        "table_id": "Table name or full query",
+        "columns": "Specific columns to profile (optional)"
+      }
+    },
+    "create_ml_model": {
+      "description": "Create BigQuery ML models (linear/logistic regression, time series, clustering)",
+      "parameters": {
+        "project_id": "GCP project ID",
+        "dataset_id": "Destination dataset ID",
+        "model_name": "Name for the new model",
+        "model_type": "LINEAR_REG|LOGISTIC_REG|TIME_SERIES_LINEAR_REG|KMEANS",
+        "training_query": "SQL query to generate training data"
+      }
+    }
+  },
+  "authentication": {
+    "type": "service_account",
+    "methods": [
+      "service_account_json",
+      "oauth2",
+      "gcloud_adc"
+    ],
+    "environment_variables": {
+      "GOOGLE_PROJECT_ID": "Your GCP project ID",
+      "GOOGLE_APPLICATION_CREDENTIALS": "Path to service account JSON file",
+      "BIGQUERY_DATASET": "Default dataset ID for queries",
+      "BIGQUERY_LOCATION": "Dataset location (e.g., US, EU, asia-northeast1)"
+    }
+  },
+  "capabilities": {
+    "query_execution": true,
+    "standard_sql": true,
+    "legacy_sql": false,
+    "data_profiling": true,
+    "ml_model_creation": true,
+    "export_to_gcs": true,
+    "load_from_gcs": true,
+    "streaming_inserts": false,
+    "maximum_query_size_gb": 100
+  },
+  "rate_limits": {
+    "concurrent_queries": 100,
+    "query_timeout_seconds": 600,
+    "max_bytes_per_query": 1099511627776,
+    "api_calls_per_second": 100
+  },
+  "pricing": {
+    "model": "on_demand",
+    "query_cost_per_tb": 6.25,
+    "storage_per_gb_month": 0.02,
+    "ml_predictions_per_1k": 0.05,
+    "recommendation": "Use on-demand for development; consider annual/monthly commitments for stable workloads"
+  },
+  "example_config": {
+    "project_id": "my-gcp-project",
+    "dataset": "analytics",
+    "location": "US",
+    "credentials_file": "~/.config/gcp/service-account.json"
+  }
+}

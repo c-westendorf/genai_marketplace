@@ -1,0 +1,139 @@
+{
+  "name": "atlassian-mcp",
+  "description": "Atlassian MCP server for Jira and Confluence integration in VSCode",
+  "version": "1.0.0",
+  "compatible_with": ["VSCode", "Copilot", "OpenAI", "Gemini", "Claude"],
+  "platform": "atlassian-cloud",
+  "services": {
+    "jira": {
+      "description": "Jira issue tracking and project management",
+      "api_version": "3"
+    },
+    "confluence": {
+      "description": "Confluence documentation and knowledge management"
+    }
+  },
+  "commands": {
+    "jira_search_issues": {
+      "description": "Search for Jira issues using JQL",
+      "parameters": {
+        "jql": "Jira Query Language search string",
+        "max_results": "Maximum results to return (default: 50)",
+        "fields": "Specific fields to return (default: all)"
+      }
+    },
+    "jira_create_issue": {
+      "description": "Create a new Jira issue",
+      "parameters": {
+        "project_key": "Project key (e.g., DATA, ML)",
+        "issue_type": "Bug, Task, Story, Epic, etc.",
+        "summary": "Issue title/summary",
+        "description": "Issue description",
+        "assignee": "Assignee email",
+        "labels": "Array of labels",
+        "custom_fields": "Custom field values as JSON"
+      }
+    },
+    "jira_update_issue": {
+      "description": "Update an existing Jira issue",
+      "parameters": {
+        "issue_key": "Issue key (e.g., DATA-123)",
+        "fields": "Fields to update as JSON",
+        "comment": "Add comment to issue"
+      }
+    },
+    "jira_get_issue": {
+      "description": "Get details of a specific Jira issue",
+      "parameters": {
+        "issue_key": "Issue key (e.g., DATA-123)"
+      }
+    },
+    "confluence_create_page": {
+      "description": "Create a new Confluence page",
+      "parameters": {
+        "space_key": "Space key (e.g., DATA, ML)",
+        "title": "Page title",
+        "body": "Page content in Confluence format (HTML or Markdown)",
+        "parent_page_id": "Parent page ID for hierarchy (optional)"
+      }
+    },
+    "confluence_update_page": {
+      "description": "Update an existing Confluence page",
+      "parameters": {
+        "page_id": "Confluence page ID",
+        "title": "New page title",
+        "body": "Updated content"
+      }
+    },
+    "confluence_get_page": {
+      "description": "Get details of a Confluence page",
+      "parameters": {
+        "page_id": "Confluence page ID"
+      }
+    },
+    "confluence_search": {
+      "description": "Search Confluence pages using CQL",
+      "parameters": {
+        "cql": "Confluence Query Language search string",
+        "max_results": "Maximum results (default: 25)"
+      }
+    },
+    "link_issue_to_page": {
+      "description": "Create a link between Jira issue and Confluence page",
+      "parameters": {
+        "issue_key": "Jira issue key (e.g., DATA-123)",
+        "page_id": "Confluence page ID",
+        "relationship": "relates to, documents, is documented by, etc."
+      }
+    }
+  },
+  "authentication": {
+    "type": "oauth2_or_api_token",
+    "methods": [
+      "api_token",
+      "oauth2",
+      "personal_access_token"
+    ],
+    "environment_variables": {
+      "ATLASSIAN_DOMAIN": "Your Atlassian domain (e.g., my-company.atlassian.net)",
+      "ATLASSIAN_EMAIL": "Account email for API authentication",
+      "ATLASSIAN_API_TOKEN": "Generated API token",
+      "ATLASSIAN_JIRA_PROJECT_KEYS": "Comma-separated Jira project keys (DATA,ML,ENG)",
+      "ATLASSIAN_CONFLUENCE_SPACE_KEYS": "Comma-separated Confluence space keys"
+    }
+  },
+  "capabilities": {
+    "jira": {
+      "search_issues": true,
+      "create_issues": true,
+      "update_issues": true,
+      "add_comments": true,
+      "manage_labels": true,
+      "transition_workflows": true,
+      "custom_fields": true
+    },
+    "confluence": {
+      "create_pages": true,
+      "update_pages": true,
+      "search_pages": true,
+      "manage_page_hierarchy": true,
+      "add_attachments": true,
+      "manage_permissions": false
+    },
+    "linking": {
+      "link_issue_to_page": true,
+      "track_related_content": true
+    }
+  },
+  "rate_limits": {
+    "jira_api_calls_per_minute": 120,
+    "confluence_api_calls_per_minute": 120,
+    "bulk_operations_max_items": 50
+  },
+  "example_config": {
+    "domain": "my-company.atlassian.net",
+    "email": "analyst@my-company.com",
+    "jira_projects": ["DATA", "ML", "ENG"],
+    "confluence_spaces": ["DATA", "ML", "ENG"]
+  }
+}

@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agile Companion — Visual Brief</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --ink: #1a1a2e;
+    --ink-soft: #4a4a6a;
+    --ink-faint: #9898b8;
+    --paper: #f7f6f2;
+    --paper-warm: #eeece5;
+    --accent: #e85d26;
+    --accent-soft: #f4a87c;
+    --teal: #2a7f7f;
+    --teal-soft: #7fbfbf;
+    --gold: #c8963c;
+    --gold-soft: #e8c87c;
+    --violet: #6b4fa0;
+    --violet-soft: #b09fd0;
+    --success: #3a8a5a;
+    --border: rgba(26,26,46,0.12);
+    --shadow: 0 2px 20px rgba(26,26,46,0.08);
+    --shadow-lg: 0 8px 40px rgba(26,26,46,0.14);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--ink);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem;
+    height: 56px;
+  }
+  .nav-title {
+    font-family: 'DM Serif Display', serif;
+    color: var(--paper);
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+  }
+  .nav-title span { color: var(--accent-soft); font-style: italic; }
+  .nav-tabs {
+    display: flex; gap: 0;
+  }
+  .nav-tab {
+    background: none; border: none; cursor: pointer;
+    color: var(--ink-faint);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0 1.2rem;
+    height: 56px;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+    position: relative;
+  }
+  .nav-tab:hover { color: var(--paper); }
+  .nav-tab.active {
+    color: var(--paper);
+    border-bottom-color: var(--accent);
+  }
+  .nav-num {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    font-size: 0.6rem;
+    line-height: 18px;
+    text-align: center;
+    margin-right: 6px;
+  }
+  .nav-tab.active .nav-num { background: var(--accent); }
+  .nav-tab:not(.active) .nav-num { background: var(--ink-soft); }
+
+  /* PANELS */
+  .panel {
+    display: none;
+    padding: 80px 2rem 4rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    animation: fadeIn 0.3s ease;
+  }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .panel-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 0.4rem;
+  }
+  .panel-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  .panel-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  .panel-sub {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin-bottom: 2.5rem;
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  /* ═══════════════════════════════════
+     PANEL 1 — SPRINT TIMELINE
+  ═══════════════════════════════════ */
+
+  .week-container {
+    display: grid;
+    grid-template-columns: 80px repeat(5, 1fr);
+    gap: 0;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .week-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.7rem 0.5rem;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-right: 1px solid rgba(255,255,255,0.1);
+  }
+  .week-header.label-col { background: var(--ink); }
+  .week-header.mon { background: #2a4a6a; }
+  .week-header.tue, .week-header.wed { background: var(--ink); }
+  .week-header.thu { background: #3a2a4a; }
+  .week-header.fri { background: #1a3a2a; }
+
+  .time-label {
+    background: var(--paper-warm);
+    padding: 0.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-right: 1.5px solid var(--border);
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+
+  .cell {
+    padding: 0.5rem;
+    border-right: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    min-height: 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .cell:last-child { border-right: none; }
+
+  .event {
+    border-radius: 6px;
+    padding: 4px 7px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    line-height: 1.3;
+    flex-shrink: 0;
+  }
+  .ev-open { background: #e8f4ff; color: #1a4a7a; border-left: 3px solid #2a7abf; }
+  .ev-standup { background: #fff3e8; color: #7a3a10; border-left: 3px solid var(--accent); }
+  .ev-eod { background: #f0ffe8; color: #1a5a1a; border-left: 3px solid var(--success); }
+  .ev-close { background: #fff8e8; color: #7a5a10; border-left: 3px solid var(--gold); }
+  .ev-plan { background: #f0e8ff; color: #4a1a7a; border-left: 3px solid var(--violet); }
+  .ev-mid { background: #e8fffc; color: #1a5a5a; border-left: 3px solid var(--teal); }
+  .ev-3p { background: #fff0f8; color: #7a1a4a; border-left: 3px solid #c03070; }
+  .ev-retro { background: #f5f0ff; color: #3a1a5a; border-left: 3px solid var(--violet); }
+
+  .timeline-legend {
+    display: flex; flex-wrap: wrap; gap: 0.6rem;
+    margin-bottom: 2rem;
+  }
+  .leg-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.72rem; color: var(--ink-soft);
+  }
+  .leg-dot {
+    width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+  }
+
+  .day-intent {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .day-card {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: var(--shadow);
+  }
+  .day-card-day {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin-bottom: 0.3rem;
+  }
+  .day-card-intent {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+  }
+  .day-card-tone {
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .day-card.mon-card { border-top: 3px solid #2a7abf; }
+  .day-card.tue-card, .day-card.wed-card { border-top: 3px solid var(--accent); }
+  .day-card.thu-card { border-top: 3px solid var(--violet); }
+  .day-card.fri-card { border-top: 3px solid var(--success); }
+
+  /* ═══════════════════════════════════
+     PANEL 2 — TRIGGER DIAGRAM
+  ═══════════════════════════════════ */
+
+  .trigger-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .trigger-inputs {
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .trigger-input {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.18s;
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  .trigger-input:hover, .trigger-input.active {
+    border-left-color: var(--accent);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+    transform: translateX(2px);
+  }
+  .trigger-input .ti-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .trigger-right {
+    display: flex; flex-direction: column; gap: 1.5rem;
+  }
+
+  .mode-card {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+    opacity: 0.4;
+    cursor: pointer;
+  }
+  .mode-card.highlighted, .mode-card:hover { opacity: 1; box-shadow: var(--shadow-lg); }
+
+  .mode-card-header {
+    display: flex; align-items: center; gap: 0.8rem;
+    margin-bottom: 0.6rem;
+  }
+  .mode-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .mode-title { font-weight: 600; font-size: 0.88rem; }
+  .mode-refs {
+    display: flex; flex-wrap: wrap; gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+  .mode-ref {
+    background: var(--paper-warm);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--ink-soft);
+  }
+  .mode-desc { font-size: 0.78rem; color: var(--ink-soft); line-height: 1.5; }
+
+  .mb-standup { background: #fff3e8; color: #7a3a10; }
+  .mb-eod { background: #f0ffe8; color: #1a5a1a; }
+  .mb-weekly { background: #fff8e8; color: #7a5a10; }
+  .mb-story { background: #f0e8ff; color: #4a1a7a; }
+  .mb-sprint { background: #e8f4ff; color: #1a4a7a; }
+  .mb-comms { background: #fff0f8; color: #7a1a4a; }
+  .mb-support { background: #ffeaea; color: #7a1a1a; }
+  .mb-midday { background: #e8fffc; color: #1a5a5a; }
+
+  /* ═══════════════════════════════════
+     PANEL 3 — PERSONA FLOW
+  ═══════════════════════════════════ */
+
+  .persona-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .persona-col-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1.5px solid var(--border);
+  }
+
+  .flow-step {
+    display: flex; gap: 0.8rem;
+    margin-bottom: 0.8rem;
+    align-items: flex-start;
+  }
+  .flow-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .flow-body {}
+  .flow-label {
+    font-size: 0.72rem;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ink-faint);
+    margin-bottom: 2px;
+  }
+  .flow-text {
+    font-size: 0.82rem;
+    color: var(--ink);
+    line-height: 1.5;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+  }
+  .flow-text em {
+    font-style: normal;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .flow-response {
+    font-size: 0.82rem;
+    color: var(--teal);
+    line-height: 1.5;
+    background: #f0fafa;
+    border: 1px solid var(--teal-soft);
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+  }
+
+  .fi-human { background: #fff3e8; }
+  .fi-coach { background: #e8f8ff; }
+  .fi-hold { background: #ffeaea; }
+  .fi-ally { background: #f0ffe8; }
+
+  .mode-shift-indicator {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin: 0.6rem 0;
+    padding: 0.4rem 0.8rem;
+    background: var(--paper-warm);
+    border-radius: 6px;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    font-family: 'DM Mono', monospace;
+  }
+  .mode-shift-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+
+  .three-modes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .mode-tile {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .mode-tile-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .mode-tile-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+  .mode-tile-trigger {
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 0.5rem;
+  }
+  .mode-tile-desc {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .mode-tile.ally { border-top: 3px solid var(--success); }
+  .mode-tile.coach { border-top: 3px solid var(--teal); }
+  .mode-tile.hold { border-top: 3px solid var(--accent); }
+
+  /* ═══════════════════════════════════
+     PANEL 4 — DOC MATURITY
+  ═══════════════════════════════════ */
+
+  .maturity-ladder {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .maturity-rung {
+    display: grid;
+    grid-template-columns: 180px 1fr 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .maturity-rung:last-child { border-bottom: none; }
+  .maturity-rung:hover { background: rgba(232,93,38,0.03); }
+  .maturity-rung.expanded { background: rgba(232,93,38,0.04); }
+
+  .rung-level {
+    padding: 1rem 1.2rem;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .rung-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin-bottom: 0.3rem;
+  }
+  .rung-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 0.95rem;
+    line-height: 1.2;
+  }
+  .rung-badge {
+    display: inline-block;
+    margin-top: 0.4rem;
+    font-size: 0.62rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+  }
+
+  .rung-col {
+    padding: 0.9rem 1rem;
+    border-right: 1px solid var(--border);
+  }
+  .rung-col:last-child { border-right: none; }
+  .rung-col-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    margin-bottom: 0.4rem;
+  }
+  .rung-col-content {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .rung-col-content strong {
+    color: var(--ink);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .progress-bar-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+  }
+  .pb-label {
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+  }
+  .pb-track {
+    height: 8px;
+    background: var(--paper-warm);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .pb-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+  }
+
+  .maturity-header {
+    display: grid;
+    grid-template-columns: 180px 1fr 1fr 1fr;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .mh-cell {
+    padding: 0.6rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    color: var(--ink-faint);
+  }
+  .mh-cell:last-child { border-right: none; }
+
+  /* SHARED */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2rem 0;
+  }
+  .callout {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.9rem 1.2rem;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+  .callout strong { color: var(--ink); font-weight: 600; }
+
+  .tag-row {
+    display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;
+  }
+  .tag {
+    background: var(--paper-warm);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+  }
+
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  }
+
+  .info-card {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    box-shadow: var(--shadow);
+  }
+  .info-card-title {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.6rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .info-card ul {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 0.4rem;
+  }
+  .info-card li {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .info-card li::before {
+    content: '→';
+    position: absolute; left: 0;
+    color: var(--accent);
+    font-size: 0.7rem;
+  }
+
+  @media (max-width: 768px) {
+    .trigger-layout, .persona-split, .two-col, .three-modes { grid-template-columns: 1fr; }
+    .week-container { overflow-x: auto; min-width: 600px; }
+    .maturity-rung { grid-template-columns: 1fr; }
+    .day-intent { grid-template-columns: repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-title">Agile <span>Companion</span> — Visual Brief</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPanel(0)">
+      <span class="nav-num">1</span>Sprint Timeline
+    </button>
+    <button class="nav-tab" onclick="showPanel(1)">
+      <span class="nav-num">2</span>Trigger Logic
+    </button>
+    <button class="nav-tab" onclick="showPanel(2)">
+      <span class="nav-num">3</span>Persona Flow
+    </button>
+    <button class="nav-tab" onclick="showPanel(3)">
+      <span class="nav-num">4</span>Doc Maturity
+    </button>
+    <button class="nav-tab" onclick="showPanel(4)">
+      <span class="nav-num">5</span>Return Protocol
+    </button>
+    <button class="nav-tab" onclick="showPanel(5)">
+      <span class="nav-num">6</span>Review & Confirm
+    </button>
+    <button class="nav-tab" onclick="showPanel(6)">
+      <span class="nav-num">7</span>System Architecture
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     PANEL 1: SPRINT TIMELINE
+════════════════════════════════════════════════ -->
+<div class="panel active" id="panel-0">
+  <div class="panel-header">
+    <span class="panel-num">01 / WHEN</span>
+    <h1 class="panel-title">The Weekly Arc</h1>
+  </div>
+  <p class="panel-sub">Every interaction belongs to a moment in the week. The companion's job shifts as the week's shape changes — from intention-setting on Monday to meaning-making on Friday.</p>
+
+  <div class="week-container">
+    <div class="week-header label-col"></div>
+    <div class="week-header mon">Monday<br><small style="opacity:.6;font-size:.6rem">Intention</small></div>
+    <div class="week-header tue">Tuesday<br><small style="opacity:.6;font-size:.6rem">Momentum</small></div>
+    <div class="week-header wed">Wednesday<br><small style="opacity:.6;font-size:.6rem">Momentum</small></div>
+    <div class="week-header thu">Thursday<br><small style="opacity:.6;font-size:.6rem">Depth</small></div>
+    <div class="week-header fri">Friday<br><small style="opacity:.6;font-size:.6rem">Integration</small></div>
+
+    <!-- MORNING ROW -->
+    <div class="time-label">Morning</div>
+    <div class="cell">
+      <div class="event ev-open">🗓 Week Open</div>
+      <div class="event ev-plan">📋 Sprint Plan Pre-work</div>
+      <div class="event ev-standup">☀️ Standup</div>
+    </div>
+    <div class="cell">
+      <div class="event ev-standup">☀️ Standup</div>
+    </div>
+    <div class="cell">
+      <div class="event ev-standup">☀️ Standup</div>
+    </div>
+    <div class="cell">
+      <div class="event ev-standup">☀️ Standup</div>
+      <div class="event ev-mid" style="opacity:.7;font-size:.65rem">⚡ check energy</div>
+    </div>
+    <div class="cell">
+      <div class="event ev-standup">☀️ Standup</div>
+    </div>
+
+    <!-- MID-DAY ROW -->
+    <div class="time-label">Mid-day</div>
+    <div class="cell"></div>
+    <div class="cell">
+      <div class="event ev-mid">⚡ Mid-day log</div>
+    </div>
+    <div class="cell">
+      <div class="event ev-mid">⚡ Mid-day log</div>
+    </div>
+    <div class="cell">
+      <div class="event ev-mid">⚡ Mid-day log</div>
+    </div>
+    <div class="cell"></div>
+
+    <!-- EOD ROW -->
+    <div class="time-label">Evening</div>
+    <div class="cell">
+      <div class="event ev-eod">🌙 EOD Journal</div>
+    </div>
+    <div class="cell">
+      <div class="event ev-eod">🌙 EOD Journal</div>
+    </div>
+    <div class="cell">
+      <div class="event ev-eod">🌙 EOD Journal</div>
+    </div>
+    <div class="cell">
+      <div class="event ev-eod">🌙 EOD Journal</div>
+    </div>
+    <div class="cell">
+      <div class="event ev-eod">🌙 EOD Journal</div>
+      <div class="event ev-close">✦ Week Close</div>
+      <div class="event ev-3p">📨 3P Summary</div>
+      <div class="event ev-retro">🔄 Retro</div>
+    </div>
+  </div>
+
+  <div class="timeline-legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#2a7abf"></div>Week / Sprint framing</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>Standup (daily)</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--success)"></div>EOD Journal</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--teal)"></div>Mid-day log</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--gold)"></div>Week Close</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#c03070"></div>3P Stakeholder Summary</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--violet)"></div>Sprint Plan Pre-work / Retro</div>
+  </div>
+
+  <div class="day-intent">
+    <div class="day-card mon-card">
+      <div class="day-card-day">Monday</div>
+      <div class="day-card-intent">Intention</div>
+      <div class="day-card-tone">Fresh energy. Before the board — "what does a good week look like?" Week is shaped by the person, not by the backlog.</div>
+    </div>
+    <div class="day-card tue-card">
+      <div class="day-card-day">Tue – Wed</div>
+      <div class="day-card-intent">Momentum</div>
+      <div class="day-card-tone">Heads down. Low friction. Context switches get named and preserved. Companion moves efficiently.</div>
+    </div>
+    <div class="day-card wed-card" style="display:none"></div>
+    <div class="day-card thu-card">
+      <div class="day-card-day">Thursday</div>
+      <div class="day-card-intent">Depth</div>
+      <div class="day-card-tone">Often hardest day. Companion watches for fatigue. Asks about energy, not just output. Scope problems surface here.</div>
+    </div>
+    <div class="day-card fri-card">
+      <div class="day-card-day">Friday</div>
+      <div class="day-card-intent">Integration</div>
+      <div class="day-card-tone">Slower pace. Week closes with meaning, not just closure. 3P drafted. Retro. One carry-forward thread named.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PANEL 2: TRIGGER LOGIC
+════════════════════════════════════════════════ -->
+<div class="panel" id="panel-1">
+  <div class="panel-header">
+    <span class="panel-num">02 / HOW</span>
+    <h1 class="panel-title">Trigger Logic & Reference Routing</h1>
+  </div>
+  <p class="panel-sub">Every user message is a signal. The companion reads it, identifies the mode, and loads only the relevant reference. Click an input signal to highlight its mode.</p>
+
+  <div class="trigger-layout">
+    <div>
+      <div style="font-family:'DM Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);margin-bottom:.8rem">Input Signals</div>
+      <div class="trigger-inputs" id="triggerInputs">
+        <div class="trigger-input" data-mode="standup" onclick="highlightMode(this,'standup')">
+          <span class="ti-label">Phrase</span>
+          "standup", "start my day", "good morning"
+        </div>
+        <div class="trigger-input" data-mode="weekopen" onclick="highlightMode(this,'weekopen')">
+          <span class="ti-label">Phrase + Day</span>
+          Monday + any standup signal
+        </div>
+        <div class="trigger-input" data-mode="eod" onclick="highlightMode(this,'eod')">
+          <span class="ti-label">Phrase</span>
+          "wrap up", "EOD", "calling it", "done for today"
+        </div>
+        <div class="trigger-input" data-mode="weekclose" onclick="highlightMode(this,'weekclose')">
+          <span class="ti-label">Phrase + Day</span>
+          Friday + any EOD signal
+        </div>
+        <div class="trigger-input" data-mode="midday" onclick="highlightMode(this,'midday')">
+          <span class="ti-label">Phrase</span>
+          "just shipped X", "quick update", "I finished X"
+        </div>
+        <div class="trigger-input" data-mode="story" onclick="highlightMode(this,'story')">
+          <span class="ti-label">Phrase or gap</span>
+          "break this down", vague work with no ticket
+        </div>
+        <div class="trigger-input" data-mode="sprint" onclick="highlightMode(this,'sprint')">
+          <span class="ti-label">Phrase</span>
+          "sprint planning", "prep for the meeting"
+        </div>
+        <div class="trigger-input" data-mode="comms" onclick="highlightMode(this,'comms')">
+          <span class="ti-label">Phrase</span>
+          "3P", "stakeholder update", "what do I send"
+        </div>
+        <div class="trigger-input" data-mode="support" onclick="highlightMode(this,'support')">
+          <span class="ti-label">Emotional signal</span>
+          "nothing's working", stuck, frustrated, flat
+        </div>
+        <div class="trigger-input" data-mode="story" onclick="highlightMode(this,'story')">
+          <span class="ti-label">Pattern: 3+ days stuck</span>
+          Same story, no movement → scope check
+        </div>
+      </div>
+    </div>
+
+    <div class="trigger-right" id="modeCards">
+      <div class="mode-card" id="mc-standup" data-mode="standup">
+        <div class="mode-card-header">
+          <span class="mode-badge mb-standup">STANDUP</span>
+          <span class="mode-title">Morning orientation + Jira pull</span>
+        </div>
+        <div class="mode-desc">Fetch ranked portfolio. Yesterday → Today → Blockers. Write standup comment to each active story.</div>
+        <div class="mode-refs">
+          <span class="mode-ref">daily-rhythm.md</span>
+          <span class="mode-ref">atlassian-patterns.md</span>
+        </div>
+      </div>
+      <div class="mode-card" id="mc-weekopen" data-mode="weekopen">
+        <div class="mode-card-header">
+          <span class="mode-badge mb-weekly">WEEK OPEN</span>
+          <span class="mode-title">Monday intention-setting</span>
+        </div>
+        <div class="mode-desc">Before the board — "what does a good week look like?" Sprint context, focus ranking, cross-team risks flagged. Then standup.</div>
+        <div class="mode-refs">
+          <span class="mode-ref">weekly-framing.md</span>
+          <span class="mode-ref">atlassian-patterns.md</span>
+        </div>
+      </div>
+      <div class="mode-card" id="mc-eod" data-mode="eod">
+        <div class="mode-card-header">
+          <span class="mode-badge mb-eod">EOD JOURNAL</span>
+          <span class="mode-title">Honest day close + tomorrow's horizon</span>
+        </div>
+        <div class="mode-desc">Open read first. Per-story capture. Commit detection (3 tiers). Re-entry notes for in-flight work. Tomorrow's two or three things.</div>
+        <div class="mode-refs">
+          <span class="mode-ref">daily-rhythm.md</span>
+          <span class="mode-ref">atlassian-patterns.md</span>
+        </div>
+      </div>
+      <div class="mode-card" id="mc-weekclose" data-mode="weekclose">
+        <div class="mode-card-header">
+          <span class="mode-badge mb-weekly">WEEK CLOSE</span>
+          <span class="mode-title">Friday integration + 3P + Retro</span>
+        </div>
+        <div class="mode-desc">EOD first, then the week as a whole. Three questions: what got done, what surprised, what carries forward. 3P drafted. Retro. Portfolio drift flagged.</div>
+        <div class="mode-refs">
+          <span class="mode-ref">weekly-framing.md</span>
+          <span class="mode-ref">stakeholder-comms.md</span>
+          <span class="mode-ref">atlassian-patterns.md</span>
+        </div>
+      </div>
+      <div class="mode-card" id="mc-midday" data-mode="midday">
+        <div class="mode-card-header">
+          <span class="mode-badge mb-midday">MID-DAY</span>
+          <span class="mode-title">Lightweight capture — don't interrupt flow</span>
+        </div>
+        <div class="mode-desc">Map update to a story. Log timestamped comment. Offer status transition if complete. Done in under a minute.</div>
+        <div class="mode-refs">
+          <span class="mode-ref">daily-rhythm.md</span>
+        </div>
+      </div>
+      <div class="mode-card" id="mc-story" data-mode="story">
+        <div class="mode-card-header">
+          <span class="mode-badge mb-story">STORY WORKSHOP</span>
+          <span class="mode-title">Author a well-formed story from scratch</span>
+        </div>
+        <div class="mode-desc">User/goal format. Testable AC. DoD by work type. Two-axis estimate (effort + uncertainty). Dependency links. Definition of Ready check before sprint entry.</div>
+        <div class="mode-refs">
+          <span class="mode-ref">story-authoring.md</span>
+          <span class="mode-ref">atlassian-patterns.md</span>
+        </div>
+      </div>
+      <div class="mode-card" id="mc-sprint" data-mode="sprint">
+        <div class="mode-card-header">
+          <span class="mode-badge mb-sprint">SPRINT PLANNING</span>
+          <span class="mode-title">Pre-work so the 30-min meeting can focus</span>
+        </div>
+        <div class="mode-desc">Capacity first. Workshop every unready story. Estimate and check DoR. Produce cross-team dependency list for the meeting room.</div>
+        <div class="mode-refs">
+          <span class="mode-ref">story-authoring.md → Sprint Planning</span>
+          <span class="mode-ref">atlassian-patterns.md</span>
+        </div>
+      </div>
+      <div class="mode-card" id="mc-comms" data-mode="comms">
+        <div class="mode-card-header">
+          <span class="mode-badge mb-comms">COMMS / 3P</span>
+          <span class="mode-title">Portfolio-ready stakeholder update</span>
+        </div>
+        <div class="mode-desc">Two versions: Internal (technical, Jira comment) and Portfolio (plain language, product-first, 30–100 person audience). Decision-needed pattern surfaced explicitly.</div>
+        <div class="mode-refs">
+          <span class="mode-ref">stakeholder-comms.md</span>
+          <span class="mode-ref">atlassian-patterns.md</span>
+        </div>
+      </div>
+      <div class="mode-card" id="mc-support" data-mode="support">
+        <div class="mode-card-header">
+          <span class="mode-badge mb-support">SUPPORT</span>
+          <span class="mode-title">Hold space — acknowledge before solving</span>
+        </div>
+        <div class="mode-desc">Three-question arc: what got in the way → what would've been different → smallest move tomorrow. Blocker taxonomy. Only structured output goes to Jira.</div>
+        <div class="mode-refs">
+          <span class="mode-ref">daily-rhythm.md → Support Mode</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Reference routing principle:</strong> The skill loads only the reference file relevant to the current mode. The main SKILL.md holds the routing logic and persona. The five reference files hold the full playbook for each domain — daily rhythm, weekly framing, story authoring, stakeholder comms, and Atlassian patterns.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PANEL 3: PERSONA FLOW
+════════════════════════════════════════════════ -->
+<div class="panel" id="panel-2">
+  <div class="panel-header">
+    <span class="panel-num">03 / WHO</span>
+    <h1 class="panel-title">The Human Persona Layer</h1>
+  </div>
+  <p class="panel-sub">The same skill, two very different days. The companion reads the room on every message and shifts its presence. Jira output is always secondary to the person feeling understood.</p>
+
+  <div class="three-modes">
+    <div class="mode-tile ally">
+      <div class="mode-tile-icon">🎯</div>
+      <div class="mode-tile-name">Practical Ally</div>
+      <div class="mode-tile-trigger">Person is oriented, needs structure</div>
+      <div class="mode-tile-desc">Light touch. Efficient. Move through the flow without adding friction. The person knows what they're doing — help them do it faster.</div>
+    </div>
+    <div class="mode-tile coach">
+      <div class="mode-tile-icon">🔎</div>
+      <div class="mode-tile-name">Curious Coach</div>
+      <div class="mode-tile-trigger">Person is uncertain or reflective</div>
+      <div class="mode-tile-desc">Slow down. Ask one great question. Reflect back what was said. Help the person understand their own work better.</div>
+    </div>
+    <div class="mode-tile hold">
+      <div class="mode-tile-icon">🤝</div>
+      <div class="mode-tile-name">Holding Space</div>
+      <div class="mode-tile-trigger">Person is stuck, frustrated, or flat</div>
+      <div class="mode-tile-desc">Acknowledge first. Never rush to documentation. The blocker is real. Name it before solving it.</div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <div class="persona-split">
+    <div>
+      <div class="persona-col-title">Alex — Balancing Well</div>
+
+      <div class="flow-step">
+        <div class="flow-icon fi-human">👤</div>
+        <div class="flow-body">
+          <div class="flow-label">Monday morning</div>
+          <div class="flow-text">"If I can get the churn model demo-ready by Thursday and not let the schema work slip another week."</div>
+        </div>
+      </div>
+      <div class="mode-shift-indicator"><div class="mode-shift-dot" style="background:var(--success)"></div>Practical ally — clear intent, just needs the board</div>
+      <div class="flow-step">
+        <div class="flow-icon fi-ally">🤖</div>
+        <div class="flow-body">
+          <div class="flow-label">Companion reads: two clear stakes, one deadline</div>
+          <div class="flow-response">"Two things with real stakes — the demo has a deadline and the schema work has been waiting. Let me pull your board..."</div>
+        </div>
+      </div>
+
+      <div class="flow-step" style="margin-top:1rem">
+        <div class="flow-icon fi-human">👤</div>
+        <div class="flow-body">
+          <div class="flow-label">Tuesday EOD</div>
+          <div class="flow-text">"Good. Got the transformation layer done — not pretty but it runs. Meeting ran long but I still got there."</div>
+        </div>
+      </div>
+      <div class="mode-shift-indicator"><div class="mode-shift-dot" style="background:var(--success)"></div>Practical ally — person is upbeat, wants to log and close</div>
+      <div class="flow-step">
+        <div class="flow-icon fi-ally">🤖</div>
+        <div class="flow-body">
+          <div class="flow-label">Companion celebrates the small win, moves efficiently</div>
+          <div class="flow-response">"You absorbed a longer meeting and still hit your target. That's solid. Anything committed?"</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="persona-col-title">Jordan — Struggling to Balance</div>
+
+      <div class="flow-step">
+        <div class="flow-icon fi-human">👤</div>
+        <div class="flow-body">
+          <div class="flow-label">Monday morning</div>
+          <div class="flow-text">"Honestly just making progress. Last week was kind of a wash."</div>
+        </div>
+      </div>
+      <div class="mode-shift-indicator"><div class="mode-shift-dot" style="background:var(--teal)"></div>Curious coach — vague intent, something underneath it</div>
+      <div class="flow-step">
+        <div class="flow-icon fi-coach">🤖</div>
+        <div class="flow-body">
+          <div class="flow-label">Companion slows down, asks one question</div>
+          <div class="flow-response">"<em>'Last week was a wash'</em> — what happened?"</div>
+        </div>
+      </div>
+
+      <div class="flow-step" style="margin-top:1rem">
+        <div class="flow-icon fi-human">👤</div>
+        <div class="flow-body">
+          <div class="flow-label">Thursday standup</div>
+          <div class="flow-text">"Honestly pretty tired. I feel like I've been working hard but I don't feel like I'm getting anywhere."</div>
+        </div>
+      </div>
+      <div class="mode-shift-indicator"><div class="mode-shift-dot" style="background:var(--accent)"></div>Holding space — fatigue + frustration, acknowledge first</div>
+      <div class="flow-step">
+        <div class="flow-icon fi-hold">🤖</div>
+        <div class="flow-body">
+          <div class="flow-label">Companion reframes before problem-solving</div>
+          <div class="flow-response">"You've actually done more than it feels like. ML-7 is closed. You've narrowed DS-42 to a specific hypothesis. <em>Does it feel like DS-42 isn't moving, or that it's harder than expected?</em>"</div>
+        </div>
+      </div>
+      <div class="flow-step" style="margin-top:.5rem">
+        <div class="flow-icon fi-coach">🤖</div>
+        <div class="flow-body">
+          <div class="flow-label">Then: scope detection fires → story workshop</div>
+          <div class="flow-response">"This story has been In Progress for 4 days. <em>Is it scoped right, or has it become more than one story?</em>"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>The key design principle:</strong> The companion never implies someone failed. "What do you know now that you didn't know this morning?" replaces "did you make progress today?" For data scientists whose work is exploratory, this reframe is the difference between a tool they use daily and one they avoid.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PANEL 4: DOCUMENTATION MATURITY
+════════════════════════════════════════════════ -->
+<div class="panel" id="panel-3">
+  <div class="panel-header">
+    <span class="panel-num">04 / WHAT</span>
+    <h1 class="panel-title">Documentation Maturity Ladder</h1>
+  </div>
+  <p class="panel-sub">What does the skill actually produce — and how does quality evolve? Each rung represents a better version of the same work artifact. Click a row to expand it.</p>
+
+  <div class="maturity-ladder">
+    <div class="maturity-header">
+      <div class="mh-cell">Level</div>
+      <div class="mh-cell">Story quality</div>
+      <div class="mh-cell">Jira artifact</div>
+      <div class="mh-cell">Team visibility</div>
+    </div>
+
+    <div class="maturity-rung" onclick="toggleRung(this)">
+      <div class="rung-level">
+        <div class="rung-num">Level 0</div>
+        <div class="rung-name">No documentation</div>
+        <span class="rung-badge" style="background:#ffeaea;color:#7a1a1a">Before skill</span>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Story quality</div>
+        <div class="rung-col-content"><strong>Vague or absent</strong>One-line ticket. No AC. No DoD. No estimate. Often not created until work is "done."</div>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Jira artifact</div>
+        <div class="rung-col-content"><strong>Nothing or stale</strong>Ticket exists but hasn't been touched in days. Status doesn't reflect reality.</div>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Team visibility</div>
+        <div class="rung-col-content"><strong>Invisible</strong>Team has no idea what's happening. Sprint health is noise.</div>
+      </div>
+    </div>
+
+    <div class="maturity-rung" onclick="toggleRung(this)">
+      <div class="rung-level">
+        <div class="rung-num">Level 1</div>
+        <div class="rung-name">Standup logging</div>
+        <span class="rung-badge" style="background:#fff3e8;color:#7a3a10">Ramp 1</span>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Story quality</div>
+        <div class="rung-col-content"><strong>Existing ticket, narrated</strong>Story exists. Companion maps daily narration to it. Comments capture intent and outcome.</div>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Jira artifact</div>
+        <div class="rung-col-content"><strong>Daily comments</strong>"Standup [date]: working on X. Plan: Y." EOD: "What happened. Tomorrow: Z."</div>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Team visibility</div>
+        <div class="rung-col-content"><strong>Day-level</strong>Team can see what someone worked on each day. Better than nothing.</div>
+      </div>
+    </div>
+
+    <div class="maturity-rung" onclick="toggleRung(this)">
+      <div class="rung-level">
+        <div class="rung-num">Level 2</div>
+        <div class="rung-name">Well-formed story</div>
+        <span class="rung-badge" style="background:#f0e8ff;color:#4a1a7a">Story Workshop</span>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Story quality</div>
+        <div class="rung-col-content"><strong>User/goal + AC + DoD</strong>"As a [who], I want [what], so that [why]." 2–4 testable acceptance criteria. DoD template applied for work type.</div>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Jira artifact</div>
+        <div class="rung-col-content"><strong>Structured story + comments</strong>Story has description, AC, DoD checklist, estimate (size + uncertainty). Comments track progress against AC.</div>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Team visibility</div>
+        <div class="rung-col-content"><strong>Story-level</strong>Anyone can read the story and know what it is, what done looks like, and whether it's on track.</div>
+      </div>
+    </div>
+
+    <div class="maturity-rung" onclick="toggleRung(this)">
+      <div class="rung-level">
+        <div class="rung-num">Level 3</div>
+        <div class="rung-name">Dependency-mapped</div>
+        <span class="rung-badge" style="background:#e8f4ff;color:#1a4a7a">Sprint Planning</span>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Story quality</div>
+        <div class="rung-col-content"><strong>Hierarchy + links</strong>Story sits in Epic → Feature → Story tree. Blocking dependencies linked. Informational dependencies named with owners and dates.</div>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Jira artifact</div>
+        <div class="rung-col-content"><strong>Linked story graph</strong>"Blocks / is blocked by" links created. Parent set. Cross-team dependencies flagged. Sprint-ready checklist passed.</div>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Team visibility</div>
+        <div class="rung-col-content"><strong>Portfolio-level</strong>PM can see the dependency graph. Planning meetings can focus on cross-team complexity, not basic hygiene.</div>
+      </div>
+    </div>
+
+    <div class="maturity-rung" onclick="toggleRung(this)">
+      <div class="rung-level">
+        <div class="rung-num">Level 4</div>
+        <div class="rung-name">Research-grade</div>
+        <span class="rung-badge" style="background:#f0ffe8;color:#1a5a1a">Data science</span>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Story quality</div>
+        <div class="rung-col-content"><strong>Spike pattern + findings</strong>Time-boxed. AC = documented findings, not shipped feature. Null results treated as deliverables. Follow-on stories created at spike close.</div>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Jira artifact</div>
+        <div class="rung-col-content"><strong>Research log</strong>"Research progress / Finding / Next step" comment format. Negative results visible. Spike closes with spawned follow-on stories — no orphaned findings.</div>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Team visibility</div>
+        <div class="rung-col-content"><strong>Knowledge-level</strong>Team learns from what didn't work. Institutional knowledge doesn't disappear when the ticket closes.</div>
+      </div>
+    </div>
+
+    <div class="maturity-rung" onclick="toggleRung(this)">
+      <div class="rung-level">
+        <div class="rung-num">Level 5</div>
+        <div class="rung-name">3P communicated</div>
+        <span class="rung-badge" style="background:#fff0f8;color:#7a1a4a">Portfolio</span>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Story quality</div>
+        <div class="rung-col-content"><strong>Product-framed narrative</strong>Work is described in terms of the product it serves, not the ticket it belongs to. Decisions and risks named explicitly.</div>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Jira artifact</div>
+        <div class="rung-col-content"><strong>Sprint summary + external draft</strong>Internal 3P written to Jira sprint. Portfolio version drafted for 30–100 person team. Decision-needed flags surfaced with named owner.</div>
+      </div>
+      <div class="rung-col">
+        <div class="rung-col-label">Team visibility</div>
+        <div class="rung-col-content"><strong>Stakeholder-level</strong>Anyone in the org can understand what this work is, whether it's on track, and whether they need to act. In 90 seconds.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="info-card">
+      <div class="info-card-title">🎯 What the skill produces that Jira alone cannot</div>
+      <ul>
+        <li>Research findings logged as first-class deliverables — including null results</li>
+        <li>Re-entry notes that survive session resets — no lost investigation threads</li>
+        <li>Scope detection that fires after 3 stuck sessions — not left to the user to notice</li>
+        <li>Portfolio drift flagged Friday — stale tickets named, not silently carried</li>
+        <li>Two-version 3P — one for the PM, one for the org — from a 5-minute conversation</li>
+        <li>Unplanned work logged with an "unplanned" label — capacity truth visible to the team</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">⚠️ Known edge cases handled</div>
+      <ul>
+        <li>Invisible collaborator — co-assignee prompt when teammate mentioned</li>
+        <li>Orphaned spike — follow-on stories always created before closing</li>
+        <li>"Done but not documented" — separate completion from write-up</li>
+        <li>Stakeholder interrupt — unplanned work captured, not lost</li>
+        <li>Multi-project tax — named and timebox offered when 3+ projects active</li>
+        <li>Story point inflation — gentle calibration once, not a lecture</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     PANEL 5: RETURN PROTOCOL
+════════════════════════════════════════════════ -->
+<div class="panel" id="panel-4">
+  <div class="panel-header">
+    <span class="panel-num">05 / RETURN</span>
+    <h1 class="panel-title">The Return Protocol</h1>
+  </div>
+  <p class="panel-sub">When someone comes back after a gap — focused sprint, PTO, or leave — the companion detects it automatically and offers a choice. The goal: close loops for teammates before catching up personally.</p>
+
+  <!-- GAP DETECTION -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem">
+    <div class="info-card" style="border-top:3px solid var(--success)">
+      <div class="info-card-title">✓ No gap (&lt; 3 days)</div>
+      <ul><li>Proceed normally — no intercept, mode detection fires as usual</li></ul>
+    </div>
+    <div class="info-card" style="border-top:3px solid var(--gold)">
+      <div class="info-card-title">⚡ Short gap (3–13 days)</div>
+      <ul><li>Intercept before mode detection</li><li>Ask: focused sprint or away?</li><li>Offer Catch-up vs Fresh Start</li></ul>
+    </div>
+    <div class="info-card" style="border-top:3px solid var(--accent)">
+      <div class="info-card-title">⏸ Long gap (14+ days)</div>
+      <ul><li>Intercept with leave framing</li><li>Briefing posture — orient before asking</li><li>Team impact scan runs automatically</li></ul>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>The opening question:</strong> "Welcome back — it's been about [N] days. Were you heads-down on something, or were you out?" Then: "Want to do a proper catch-up, or would you rather just focus on what's ahead?" Never lead with Jira data. Never say "you haven't logged in N days."
+  </div>
+
+  <!-- TWO PATHS -->
+  <div class="two-col" style="margin-bottom:2rem">
+    <div>
+      <div class="persona-col-title" style="font-family:'DM Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--border)">Path A — Catch-up Mode</div>
+
+      <div class="flow-step">
+        <div class="flow-icon" style="background:#e8f4ff;font-size:.75rem">1</div>
+        <div class="flow-body">
+          <div class="flow-label">Delta scan</div>
+          <div class="flow-text">Pull what changed during the gap in three buckets: <em>Resolved</em> (good news first), <em>Changed</em> (needs attention), <em>Waiting on you</em> (teammate blockers — most urgent).</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-icon" style="background:#ffeaea;font-size:.75rem">2</div>
+        <div class="flow-body">
+          <div class="flow-label">Team impact scan</div>
+          <div class="flow-text">For every "waiting on you" story — fetch the full dependency chain. Surface blocked teammates by name. <em>"[Person] has been waiting since [date]. Want to reach out before we do anything else?"</em></div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-icon" style="background:#f0e8ff;font-size:.75rem">3</div>
+        <div class="flow-body">
+          <div class="flow-label">Per-story retrospective log</div>
+          <div class="flow-text">One story at a time. Three questions: what moved? what's the current state? what's next? Write to Jira after each — never batch. Always confirm attribution before writing.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-icon" style="background:#f0ffe8;font-size:.75rem">4</div>
+        <div class="flow-body">
+          <div class="flow-label">Sprint reconciliation</div>
+          <div class="flow-text">If sprint turned over during absence — show the delta between old and new sprint goal before touching any stories.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-icon" style="background:#fff8e8;font-size:.75rem">5</div>
+        <div class="flow-body">
+          <div class="flow-label">Reorientation close</div>
+          <div class="flow-text">Stories updated: [N]. Loops closed: [names]. Your focus today: [top 1–2]. Then offer standup or just get started.</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="persona-col-title" style="font-family:'DM Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--border)">Path B — Fresh Start Mode</div>
+
+      <div class="flow-step">
+        <div class="flow-icon" style="background:#f0ffe8;font-size:.75rem">✓</div>
+        <div class="flow-body">
+          <div class="flow-label">Honor the choice</div>
+          <div class="flow-text">"Fresh start it is — let me pull your current board." No suggestion they <em>should</em> catch up. No return to the gap.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-icon" style="background:#ffeaea;font-size:.75rem">!</div>
+        <div class="flow-body">
+          <div class="flow-label">One non-negotiable check</div>
+          <div class="flow-text">Even on fresh start — surface any "waiting on you" teammate blockers. <em>"One thing before we move on — [person] has [story] blocked waiting on you."</em> Surface once. Honor whatever the person decides. Then drop it.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-icon" style="background:#e8f4ff;font-size:.75rem">→</div>
+        <div class="flow-body">
+          <div class="flow-label">Proceed to STANDUP</div>
+          <div class="flow-text">Run normal standup from here. Don't mention the gap again. The person chose to move forward — respect that completely.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.5rem;padding:1rem;background:var(--paper-warm);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-family:'DM Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);margin-bottom:.4rem">The framing distinction</div>
+        <div style="font-size:.78rem;color:var(--ink-soft);line-height:1.6">Focused sprint return = <strong>reconciliation</strong>. They were working — help Jira catch up to reality.<br><br>PTO/leave return = <strong>briefing</strong>. They were away — help them understand what changed before they can do anything.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATTRIBUTION ENGINE -->
+  <div class="section-divider"></div>
+  <h2 style="font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:.4rem">Attribution Engine</h2>
+  <p style="font-size:.9rem;color:var(--ink-soft);margin-bottom:1.5rem;line-height:1.6">How the companion maps narrated work to the right Jira story — without ever auto-attributing.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem">
+    <div class="info-card" style="border-top:3px solid var(--success)">
+      <div class="info-card-title" style="font-size:.8rem">🎯 High confidence</div>
+      <div style="font-size:.75rem;color:var(--ink-soft);line-height:1.5;margin-bottom:.5rem">One story clearly matches — keywords, domain, or story key mentioned.</div>
+      <div style="background:var(--paper-warm);border-radius:6px;padding:.5rem;font-size:.72rem;color:var(--teal);font-style:italic">"That sounds like DS-42 — the churn pipeline. Is that right?"</div>
+    </div>
+    <div class="info-card" style="border-top:3px solid var(--gold)">
+      <div class="info-card-title" style="font-size:.8rem">⚖️ Medium confidence</div>
+      <div style="font-size:.75rem;color:var(--ink-soft);line-height:1.5;margin-bottom:.5rem">Two stories could match. Present both options explicitly.</div>
+      <div style="background:var(--paper-warm);border-radius:6px;padding:.5rem;font-size:.72rem;color:var(--teal);font-style:italic">"Was that DS-42 the feature pipeline, or DS-44 model eval?"</div>
+    </div>
+    <div class="info-card" style="border-top:3px solid var(--accent)">
+      <div class="info-card-title" style="font-size:.8rem">❓ Low confidence</div>
+      <div style="font-size:.75rem;color:var(--ink-soft);line-height:1.5;margin-bottom:.5rem">No clear match. Don't guess. Open question only.</div>
+      <div style="background:var(--paper-warm);border-radius:6px;padding:.5rem;font-size:.72rem;color:var(--teal);font-style:italic">"Which story does that belong to? I want to make sure it goes to the right place."</div>
+    </div>
+    <div class="info-card" style="border-top:3px solid var(--violet)">
+      <div class="info-card-title" style="font-size:.8rem">🆕 No match</div>
+      <div style="font-size:.75rem;color:var(--ink-soft);line-height:1.5;margin-bottom:.5rem">Work has no Jira ticket. Create new story or log as unplanned.</div>
+      <div style="background:var(--paper-warm);border-radius:6px;padding:.5rem;font-size:.72rem;color:var(--teal);font-style:italic">"I don't see a ticket for that — unplanned work, or is there one I'm missing?"</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="info-card">
+      <div class="info-card-title">📜 The cardinal rule</div>
+      <ul>
+        <li><strong>Never auto-attribute.</strong> Always ask which project explicitly — even when confidence is high</li>
+        <li>Wrong attribution is worse than no attribution — it actively misleads the team</li>
+        <li>Once confirmed in a session, carry the mapping forward — don't re-confirm the same story twice</li>
+        <li>Cross-project narration: always ask to split or collapse, never decide unilaterally</li>
+        <li>Attribution memory resets at each new session — ask fresh every time</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">🔄 The "wheels responsibility" persona</div>
+      <ul>
+        <li>Owns things even when absent — loops must be closed, not just acknowledged</li>
+        <li>Needs to know what was <em>handled without them</em> — decisions made, merges completed</li>
+        <li>Needs language for the gap: focused sprint and PTO are both legitimate, neither needs apology</li>
+        <li>Gap narrative written to sprint (not story) — context for the whole team, not just one ticket</li>
+        <li>Comes back to serve the team, not just to catch up personally</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     PANEL 6: REVIEW & CONFIRM
+════════════════════════════════════════════════ -->
+<div class="panel" id="panel-5">
+  <div class="panel-header">
+    <span class="panel-num">06 / APPROVE</span>
+    <h1 class="panel-title">Review & Confirm</h1>
+  </div>
+  <p class="panel-sub">Nothing writes to Jira or disk without explicit human approval. Two distinct loops: a fast factual scan for Jira, a patient editorial loop for the 3P changelog. The companion is a ghostwriter. The person is the author.</p>
+
+  <div class="callout" style="border-left-color:var(--teal)">
+    <strong>The governing principle:</strong> Draft → Show → Edit → Confirm → Write. Every output type has an approval gate. The 3P changelog is never a Jira artifact — it's a personal file the individual owns, versions, and references in meetings or communications.
+  </div>
+
+  <!-- TWO LOOPS SIDE BY SIDE -->
+  <div class="two-col" style="margin-bottom:2rem;align-items:start">
+
+    <!-- LOOP A: JIRA -->
+    <div>
+      <div style="font-family:'DM Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--teal);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:2px solid var(--teal)">Loop A — Jira Review (Factual)</div>
+      <div style="font-size:.78rem;color:var(--ink-soft);margin-bottom:1.2rem;line-height:1.5">Fast, binary, per batch. Used for standup comments, EOD updates, blocker flags, status transitions, sub-tasks, sprint adds, catch-up logs.</div>
+
+      <!-- STEP 1 -->
+      <div style="background:white;border:1.5px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.8rem;box-shadow:var(--shadow)">
+        <div style="font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin-bottom:.5rem">Step 1 — Quick Scan</div>
+        <div style="background:var(--paper-warm);border-radius:6px;padding:.7rem;font-family:'DM Mono',monospace;font-size:.72rem;line-height:1.7;color:var(--ink)">
+          Here's what I'm about to write:<br><br>
+          → DS-42 &nbsp;[comment] EOD — transformation layer done<br>
+          → DATA-3 [comment] Blocker — waiting on Mira<br>
+          → DS-42 &nbsp;[transition] In Progress → In Review &nbsp;<span style="color:var(--accent)">⚠️</span><br><br>
+          <span style="color:var(--ink-soft)">Anything missing, wrong, or skip?</span>
+        </div>
+        <div style="margin-top:.6rem;font-size:.75rem;color:var(--ink-soft);line-height:1.5">One line per write. ⚠️ flags status transitions. Omissions listed at bottom. Person can say "skip [story]" — honored immediately, no confirmation asked.</div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div style="background:white;border:1.5px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.8rem;box-shadow:var(--shadow)">
+        <div style="font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin-bottom:.5rem">Step 2 — Confirm & Write</div>
+        <div style="font-size:.78rem;color:var(--ink-soft);line-height:1.5">After "looks good": write all in sequence. Show completion receipt. One final catch — then close.</div>
+        <div style="background:var(--paper-warm);border-radius:6px;padding:.7rem;font-family:'DM Mono',monospace;font-size:.72rem;line-height:1.7;color:var(--ink);margin-top:.5rem">
+          Done. Written to Jira:<br>
+          ✓ DS-42 — EOD comment<br>
+          ✓ DATA-3 — blocker flag<br>
+          ✓ DS-42 — moved to In Review
+        </div>
+      </div>
+
+      <!-- EXTRA GATE -->
+      <div style="background:#fff3e8;border:1.5px solid var(--accent-soft);border-radius:10px;padding:1rem;box-shadow:var(--shadow)">
+        <div style="font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:.4rem">Status Transition — Extra Gate</div>
+        <div style="font-size:.78rem;color:var(--ink-soft);line-height:1.5">Status changes always get a second explicit confirmation even after scan approval. Two yeses required. Team-visible, hard to undo gracefully.</div>
+        <div style="background:white;border-radius:6px;padding:.6rem;font-size:.75rem;color:var(--ink);margin-top:.5rem;font-style:italic">"Moving DS-42 to In Review — this notifies everyone watching. Confirm?"</div>
+      </div>
+    </div>
+
+    <!-- LOOP B: 3P -->
+    <div>
+      <div style="font-family:'DM Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--violet);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:2px solid var(--violet)">Loop B — 3P Editorial Review (Patient)</div>
+      <div style="font-size:.78rem;color:var(--ink-soft);margin-bottom:1.2rem;line-height:1.5">Slower, subjective, iterative. The companion acts as an editor. The person directs — not just corrects. Accepts directorial feedback, not just literal edits.</div>
+
+      <!-- EDITORIAL FEEDBACK TYPES -->
+      <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem">
+        <div style="background:white;border:1.5px solid var(--border);border-radius:8px;padding:.7rem;box-shadow:var(--shadow)">
+          <div style="font-size:.7rem;font-family:'DM Mono',monospace;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Factual correction</div>
+          <div style="font-size:.78rem;color:var(--ink)">"Mira's deadline is Tuesday not Monday" → Fix literally. Re-show that section only.</div>
+        </div>
+        <div style="background:white;border:1.5px solid var(--border);border-radius:8px;padding:.7rem;box-shadow:var(--shadow)">
+          <div style="font-size:.7rem;font-family:'DM Mono',monospace;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Tone correction</div>
+          <div style="font-size:.78rem;color:var(--ink)">"This undersells what I actually did" → Ask what should land differently. Rewrite PROGRESS.</div>
+        </div>
+        <div style="background:white;border:1.5px solid var(--border);border-radius:8px;padding:.7rem;box-shadow:var(--shadow)">
+          <div style="font-size:.7rem;font-family:'DM Mono',monospace;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Audience correction</div>
+          <div style="font-size:.78rem;color:var(--ink)">"Too technical for this group" → Rewrite for plain language. Check jargon.</div>
+        </div>
+        <div style="background:white;border:1.5px solid var(--border);border-radius:8px;padding:.7rem;box-shadow:var(--shadow)">
+          <div style="font-size:.7rem;font-family:'DM Mono',monospace;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Framing correction</div>
+          <div style="font-size:.78rem;color:var(--ink)">"Makes me sound more blocked than I am" → Show agency in PROBLEMS — what's being done, not just what's in the way.</div>
+        </div>
+      </div>
+
+      <!-- SAVE FLOW -->
+      <div style="background:white;border:1.5px solid var(--border);border-top:3px solid var(--violet);border-radius:10px;padding:1rem;box-shadow:var(--shadow)">
+        <div style="font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--violet);margin-bottom:.5rem">Final Approval Gate</div>
+        <div style="background:var(--paper-warm);border-radius:6px;padding:.7rem;font-family:'DM Mono',monospace;font-size:.72rem;line-height:1.7;color:var(--ink)">
+          Both versions ready.<br>
+          Portfolio: "Completed churn model investigation..."<br>
+          Internal: "[DS-42a] Completed spike..."<br><br>
+          Saving to ~/agile-companion/changelogs/jordan/<br>
+          2025_jordan_3p.md — week 12 appended.<br><br>
+          <span style="color:var(--ink-soft)">Save it?</span>
+        </div>
+        <div style="font-size:.75rem;color:var(--ink-soft);margin-top:.6rem;line-height:1.5">Never auto-save. Explicit "yes" required. After local save: offer repo publish once — not again if declined.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3P CHANGELOG ARCHITECTURE -->
+  <div class="section-divider"></div>
+  <h2 style="font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:.4rem">The 3P Changelog — File Architecture</h2>
+  <p style="font-size:.9rem;color:var(--ink-soft);margin-bottom:1.5rem;line-height:1.6">Not a Jira artifact. A personal professional record that compounds over time — one annual file per person, one week appended at a time.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+    <div class="info-card" style="border-top:3px solid var(--success)">
+      <div class="info-card-title">📁 Local (always)</div>
+      <ul>
+        <li><code style="font-size:.7rem;background:var(--paper-warm);padding:1px 4px;border-radius:3px">~/agile-companion/changelogs/[user]/</code></li>
+        <li>Annual file: <code style="font-size:.7rem;background:var(--paper-warm);padding:1px 4px;border-radius:3px">2025_jordan_3p.md</code></li>
+        <li>Each week appended — one document, full year</li>
+        <li>Draft file deleted after save</li>
+        <li>Always written, no matter what</li>
+      </ul>
+    </div>
+    <div class="info-card" style="border-top:3px solid var(--teal)">
+      <div class="info-card-title">🔀 Repo (optional)</div>
+      <ul>
+        <li>Offered once after local save</li>
+        <li>Direct commit or PR — user's choice</li>
+        <li>Goes to <code style="font-size:.7rem;background:var(--paper-warm);padding:1px 4px;border-radius:3px">changelogs/[user]/</code> in team repo</li>
+        <li>Commit msg: <code style="font-size:.7rem;background:var(--paper-warm);padding:1px 4px;border-radius:3px">3p: week of [date]</code></li>
+        <li>If declined: never asked again this session</li>
+      </ul>
+    </div>
+    <div class="info-card" style="border-top:3px solid var(--gold)">
+      <div class="info-card-title">📋 How it gets used</div>
+      <ul>
+        <li>Paste portfolio version into Slack or email</li>
+        <li>Open before a stakeholder call</li>
+        <li>Bring internal version to lead conversation</li>
+        <li>Reference in performance reviews</li>
+        <li>Ask companion: "pull my 3P from two weeks ago"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- WHAT NEVER HAPPENS -->
+  <div class="two-col">
+    <div class="info-card">
+      <div class="info-card-title">✗ What the companion never does</div>
+      <ul>
+        <li>Writes to Jira without scan approval</li>
+        <li>Writes to disk without explicit "save" confirmation</li>
+        <li>Pushes to a repo without explicit "yes, commit it"</li>
+        <li>Re-shows the full 3P after a minor edit — changed section only</li>
+        <li>Asks "are you sure?" when person says skip or remove</li>
+        <li>Suggests improving the 3P after person says "it's fine, save it"</li>
+        <li>Writes the 3P to Jira — ever</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">✓ Output approval quick reference</div>
+      <ul>
+        <li><strong>Jira comment</strong> — two-step scan → "write it"</li>
+        <li><strong>Status transition</strong> — scan + extra confirm → two yeses</li>
+        <li><strong>New story / sub-task</strong> — scan + full draft shown → "create it"</li>
+        <li><strong>Catch-up log entry</strong> — per-story confirm → "write it" each</li>
+        <li><strong>3P portfolio version</strong> — editorial loop → "save it"</li>
+        <li><strong>3P internal version</strong> — quick review → "save it"</li>
+        <li><strong>Repo publish</strong> — offered once after local save → explicit yes</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     PANEL 7: SYSTEM ARCHITECTURE
+════════════════════════════════════════════════ -->
+<div class="panel" id="panel-6">
+  <div class="panel-header">
+    <span class="panel-num">07 / SYSTEM</span>
+    <h1 class="panel-title">System Architecture</h1>
+  </div>
+  <p class="panel-sub">How the pieces connect — from individual skill instance to team Confluence database. Every person owns their data. The team view emerges automatically.</p>
+
+  <!-- WINS LOOP -->
+  <h2 style="font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:.8rem">Plausible Wins Loop</h2>
+  <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center;margin-bottom:2rem">
+    <div style="background:white;border:1.5px solid var(--border);border-top:3px solid var(--accent);border-radius:10px;padding:1rem;box-shadow:var(--shadow)">
+      <div style="font-family:'DM Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:.5rem">Morning — STANDUP</div>
+      <div style="font-size:.8rem;color:var(--ink);line-height:1.6">Companion reads board + activity log + re-entry notes. Asks one thing: <em>"What would make today feel like a success?"</em> Writes win condition to <code style="font-size:.7rem;background:var(--paper-warm);padding:1px 4px;border-radius:3px">today-wins.json</code>. Closes: "I'll ask about these tonight."</div>
+    </div>
+    <div style="text-align:center;color:var(--accent);font-size:1.5rem;flex-shrink:0">⟳</div>
+    <div style="background:white;border:1.5px solid var(--border);border-top:3px solid var(--success);border-radius:10px;padding:1rem;box-shadow:var(--shadow)">
+      <div style="font-family:'DM Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--success);margin-bottom:.5rem">Evening — EOD</div>
+      <div style="font-size:.8rem;color:var(--ink);line-height:1.6">Reads <code style="font-size:.7rem;background:var(--paper-warm);padding:1px 4px;border-radius:3px">today-wins.json</code> + activity signals. Leads with: <em>"Did it happen — [win]?"</em> Generates silent draft from signals. Person reacts, corrects, approves. Re-entry notes written for tomorrow.</div>
+    </div>
+  </div>
+
+  <!-- LOCAL FILE LAYER -->
+  <h2 style="font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:.8rem">Local Signal Layer</h2>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:2rem">
+    <div style="background:white;border:1.5px solid var(--border);border-radius:8px;padding:.8rem;box-shadow:var(--shadow);text-align:center">
+      <div style="font-size:1.2rem;margin-bottom:.3rem">🔗</div>
+      <div style="font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;color:var(--ink-faint);margin-bottom:.3rem">Git Hook</div>
+      <div style="font-size:.72rem;color:var(--ink-soft)">Post-commit → <code style="font-size:.65rem;background:var(--paper-warm);padding:1px 3px;border-radius:2px">today-commits.log</code></div>
+    </div>
+    <div style="background:white;border:1.5px solid var(--border);border-radius:8px;padding:.8rem;box-shadow:var(--shadow);text-align:center">
+      <div style="font-size:1.2rem;margin-bottom:.3rem">📓</div>
+      <div style="font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;color:var(--ink-faint);margin-bottom:.3rem">Activity Watcher</div>
+      <div style="font-size:.72rem;color:var(--ink-soft)">File saves, notebooks, tests, training → <code style="font-size:.65rem;background:var(--paper-warm);padding:1px 3px;border-radius:2px">today-activity.log</code></div>
+    </div>
+    <div style="background:white;border:1.5px solid var(--border);border-radius:8px;padding:.8rem;box-shadow:var(--shadow);text-align:center">
+      <div style="font-size:1.2rem;margin-bottom:.3rem">🏆</div>
+      <div style="font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;color:var(--ink-faint);margin-bottom:.3rem">Wins File</div>
+      <div style="font-size:.72rem;color:var(--ink-soft)">Morning win statement → <code style="font-size:.65rem;background:var(--paper-warm);padding:1px 3px;border-radius:2px">today-wins.json</code></div>
+    </div>
+    <div style="background:white;border:1.5px solid var(--border);border-radius:8px;padding:.8rem;box-shadow:var(--shadow);text-align:center">
+      <div style="font-size:1.2rem;margin-bottom:.3rem">📄</div>
+      <div style="font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;color:var(--ink-faint);margin-bottom:.3rem">3P Changelog</div>
+      <div style="font-size:.72rem;color:var(--ink-soft)">Annual file per person → <code style="font-size:.65rem;background:var(--paper-warm);padding:1px 3px;border-radius:2px">2025_[user]_3p.md</code></div>
+    </div>
+  </div>
+
+  <!-- TEAM CONFLUENCE ARCHITECTURE -->
+  <h2 style="font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:.5rem">Team Confluence Architecture</h2>
+  <p style="font-size:.85rem;color:var(--ink-soft);margin-bottom:1.2rem;line-height:1.6">Database model eliminates all concurrent write risk. Each person inserts their own row — independent records, no collision possible. The team page is a filtered view, never hand-edited.</p>
+
+  <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.8rem;align-items:start;margin-bottom:1.5rem">
+    <div style="background:white;border:1.5px solid var(--border);border-top:3px solid var(--teal);border-radius:10px;padding:1rem;box-shadow:var(--shadow)">
+      <div style="font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin-bottom:.5rem">Person files 3P</div>
+      <div style="font-size:.75rem;color:var(--ink-soft);line-height:1.5">COMMS mode — any time, any day. Editorial review. Status signal collected. Days worked collected. Approval gate.</div>
+    </div>
+    <div style="display:flex;align-items:center;color:var(--teal);font-size:1.2rem;padding-top:1.5rem">→</div>
+    <div style="background:white;border:1.5px solid var(--border);border-top:3px solid var(--violet);border-radius:10px;padding:1rem;box-shadow:var(--shadow)">
+      <div style="font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--violet);margin-bottom:.5rem">Confluence Database</div>
+      <div style="font-size:.72rem;color:var(--ink);margin-bottom:.5rem;font-family:'DM Mono',monospace;background:var(--paper-warm);border-radius:4px;padding:.4rem;line-height:1.6">person · week · sprint<br>product_area · status<br>progress · problems · plans<br>confidence · filed_at · days</div>
+      <div style="font-size:.72rem;color:var(--ink-soft)">Upsert on {person, week}. One row per person per week. Independent rows — zero collision.</div>
+    </div>
+    <div style="display:flex;align-items:center;color:var(--violet);font-size:1.2rem;padding-top:1.5rem">→</div>
+    <div style="background:white;border:1.5px solid var(--border);border-top:3px solid var(--gold);border-radius:10px;padding:1rem;box-shadow:var(--shadow)">
+      <div style="font-family:'DM Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin-bottom:.5rem">Team Page (PM view)</div>
+      <div style="font-size:.75rem;color:var(--ink-soft);line-height:1.5">Database view — configured once. Filter by week, status, product area. "Who hasn't filed?" = absence from current week rows. Never hand-edited.</div>
+    </div>
+  </div>
+
+  <!-- CONFIG LAYER -->
+  <div class="two-col">
+    <div class="info-card" style="border-top:3px solid var(--ink)">
+      <div class="info-card-title">⚙️ team-config.yml — in the team repo</div>
+      <ul>
+        <li>Lives at <code style="font-size:.7rem;background:var(--paper-warm);padding:1px 4px;border-radius:3px">.agile-companion/team-config.yml</code></li>
+        <li>Confluence database ID, team page ID, space key</li>
+        <li>IDE signal registry — which signals matter for this team's work type</li>
+        <li>Team member list — powers "who hasn't filed" detection</li>
+        <li>One PR to update → whole team gets the change on next pull</li>
+        <li>Run <code style="font-size:.7rem;background:var(--paper-warm);padding:1px 4px;border-radius:3px">bash scripts/team-setup.sh</code> for interactive first-time config</li>
+      </ul>
+    </div>
+    <div class="info-card" style="border-top:3px solid var(--accent)">
+      <div class="info-card-title">🔌 Jira fallback — clipboard mode</div>
+      <ul>
+        <li>Skill checks MCP availability at start of every Jira write</li>
+        <li>MCP available → write directly via API</li>
+        <li>MCP unavailable → format comment as clean text</li>
+        <li>Tell user: "Paste this into [story] via the Jira VS Code plugin"</li>
+        <li>No error message. No setup instructions mid-flow.</li>
+        <li>Clipboard mode is seamless — same review-confirm loop, different destination</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showPanel(idx) {
+    document.querySelectorAll('.panel').forEach((p,i) => {
+      p.classList.toggle('active', i===idx);
+    });
+    document.querySelectorAll('.nav-tab').forEach((t,i) => {
+      t.classList.toggle('active', i===idx);
+    });
+  }
+
+  function highlightMode(el, mode) {
+    document.querySelectorAll('.trigger-input').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.mode-card').forEach(c => {
+      c.classList.toggle('highlighted', c.dataset.mode === mode);
+    });
+    const target = document.getElementById('mc-'+mode);
+    if (target) target.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function toggleRung(el) {
+    el.classList.toggle('expanded');
+  }
+
+  // Animate progress bars on panel 4 load
+  document.querySelectorAll('.nav-tab').forEach((tab, i) => {
+    tab.addEventListener('click', () => {
+      if (i === 3) {
+        setTimeout(() => {
+          document.querySelectorAll('.pb-fill').forEach(f => {
+            f.style.width = f.dataset.w || f.style.width;
+          });
+        }, 100);
+      }
+    });
+  });
+
+  // Highlight all modes on load for panel 2
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.add('highlighted'));
+  // Then dim them so click interaction is meaningful
+  setTimeout(() => {
+    document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('highlighted'));
+  }, 600);
+</script>
+</body>
+</html>

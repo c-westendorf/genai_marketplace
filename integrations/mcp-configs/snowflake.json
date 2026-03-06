@@ -1,0 +1,88 @@
+{
+  "name": "snowflake-mcp",
+  "description": "Snowflake MCP server for data querying, transformation, and analysis in VSCode",
+  "version": "1.0.0",
+  "compatible_with": ["VSCode", "Copilot", "OpenAI", "Gemini", "Claude"],
+  "platform": "azure-snowflake",
+  "commands": {
+    "query": {
+      "description": "Execute SQL queries against Snowflake",
+      "parameters": {
+        "sql": "SQL query string",
+        "database": "Target database (optional, uses default if not specified)",
+        "schema": "Target schema (optional, uses default if not specified)",
+        "limit": "Maximum rows to return (default: 1000)"
+      }
+    },
+    "schema_introspection": {
+      "description": "Inspect database, schema, table structures",
+      "parameters": {
+        "type": "database|schema|table|column",
+        "name": "Name of object to inspect"
+      }
+    },
+    "data_profile": {
+      "description": "Generate profile statistics for a table",
+      "parameters": {
+        "table": "table_name",
+        "database": "database_name",
+        "schema": "schema_name",
+        "columns": "Comma-separated column names (optional, profiles all if not specified)"
+      }
+    },
+    "execute_dml": {
+      "description": "Execute INSERT, UPDATE, DELETE statements",
+      "parameters": {
+        "sql": "DML statement",
+        "database": "Target database",
+        "schema": "Target schema"
+      }
+    }
+  },
+  "authentication": {
+    "type": "service_account",
+    "methods": [
+      "username_password",
+      "oauth2",
+      "jwt_token",
+      "sso"
+    ],
+    "environment_variables": {
+      "SNOWFLAKE_ACCOUNT": "Your Snowflake account identifier (e.g., xy12345.us-east-1)",
+      "SNOWFLAKE_USER": "Service account username",
+      "SNOWFLAKE_PASSWORD": "Service account password or OAuth token",
+      "SNOWFLAKE_WAREHOUSE": "Default warehouse for queries",
+      "SNOWFLAKE_DATABASE": "Default database",
+      "SNOWFLAKE_SCHEMA": "Default schema",
+      "SNOWFLAKE_ROLE": "Default role for executing queries"
+    }
+  },
+  "capabilities": {
+    "query_execution": true,
+    "schema_introspection": true,
+    "data_profiling": true,
+    "dml_execution": true,
+    "transaction_support": true,
+    "concurrent_queries": 5
+  },
+  "rate_limits": {
+    "queries_per_minute": 60,
+    "max_result_rows": 100000,
+    "query_timeout_seconds": 300,
+    "concurrent_connections": 5
+  },
+  "cost_considerations": {
+    "compute_unit": "Per second of query execution",
+    "warehouse_sizing": "Larger warehouses = faster queries but higher cost",
+    "data_transfer": "Minimal for same-region queries, charges apply for cross-region",
+    "storage": "Charged separately based on data stored",
+    "recommendation": "Use small warehouses for development, scale up for production"
+  },
+  "example_config": {
+    "account": "xy12345.us-east-1.azure",
+    "warehouse": "COMPUTE_WH",
+    "database": "ANALYTICS",
+    "schema": "PUBLIC",
+    "role": "ANALYST"
+  }
+}
